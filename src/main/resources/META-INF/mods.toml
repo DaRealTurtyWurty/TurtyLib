@@ -1,0 +1,24 @@
+modLoader="javafml"
+loaderVersion="[39,)"
+license="LGPL-3.0"
+#issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/"
+
+[[mods]]
+	modId="turtylib"
+	version="1.0"
+	displayName="TurtyLib"
+	#updateJSONURL="https://change.me.example.invalid/updates.json"
+	#displayURL="https://change.me.to.your.mods.homepage.example.invalid/"
+	logoFile="turtylib.png"
+	credits="TurtyWurty"
+	authors="TurtyWurty"
+	description='''
+    A library mod for Minecraft Forge with multiple utilities. Primarily used for Turty's Chemistry.
+	'''
+
+[[mods]]
+	modId="testmod"
+	version="1.0"
+	displayName="Test Mod"
+	credits="TurtyWurty"
+	authors="TurtyWurty"

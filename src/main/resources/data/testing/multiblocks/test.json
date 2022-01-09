@@ -1,0 +1,43 @@
+{
+    "layers": {
+        "0": [
+            "aaa",
+            "aaa",
+            "aaa"
+        ],
+        "1": [
+            "aaa",
+            "a a",
+            "aha"
+        ],
+        "2": [
+            "aaa",
+            "aaa",
+            "aaa"
+        ]
+    },
+    "keys": {
+        "a": {
+            "blocks": [
+                {
+                    "name": "minecraft:furnace",
+                    "state": {
+                        "facing": "north",
+                        "lit": false
+                    }
+                },
+                {
+                    "name": "minecraft:dirt"
+                }
+            ]
+        },
+        "h": {
+            "blocks": [
+                {
+                    "name": "testmod:test"
+                }
+            ]
+        }
+    },
+    "controller": "h"
+}
