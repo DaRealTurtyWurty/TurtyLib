@@ -11,6 +11,17 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: 'java'
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
 
 version = '1.0'
 group = 'io.github.darealturtywurty.turtylib'

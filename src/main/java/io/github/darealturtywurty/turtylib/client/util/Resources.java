@@ -10,15 +10,21 @@ public final class Resources {
     public static final ResourceLocation TOGGLE_SWITCH_RED_GREEN = component("toggle_switch_red_green");
     public static final ResourceLocation POPOUT = component("popout");
     public static final ResourceLocation TAB_BACKGROUND = component("tab_background");
+    public static final ResourceLocation BLANK_BOOK_PAGE = book("blank_book_page");
+    public static final ResourceLocation BOOK_BINDER = book("binder");
     
     private Resources() {
         throw new IllegalStateException("Attempted to construct constants class!");
     }
     
+    public static ResourceLocation book(String fileName) {
+        return component("book/" + fileName);
+    }
+    
     public static ResourceLocation component(String fileName) {
         return gui("components/" + fileName);
     }
-    
+
     public static ResourceLocation gui(String fileName) {
         return new ResourceLocation(TurtyLib.MODID, "textures/gui/" + fileName + ".png");
     }

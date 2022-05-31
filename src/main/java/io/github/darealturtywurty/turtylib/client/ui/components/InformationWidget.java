@@ -19,19 +19,18 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
-public class InformationButton extends AbstractWidget {
-    
+public class InformationWidget extends AbstractWidget {
     private final List<Component> onHover;
     private final Optional<TooltipComponent> optionalComponent;
     protected final Minecraft minecraft;
     protected final Font font;
     protected final Screen screen;
-
-    public InformationButton(Screen screen, int xPos, int yPos, int width, int height, Component... hoverText) {
+    
+    public InformationWidget(Screen screen, int xPos, int yPos, int width, int height, Component... hoverText) {
         this(screen, xPos, yPos, width, height, Optional.empty(), hoverText);
     }
-    
-    public InformationButton(Screen screen, int xPos, int yPos, int width, int height,
+
+    public InformationWidget(Screen screen, int xPos, int yPos, int width, int height,
             Optional<TooltipComponent> optionalComponent, Component... hoverText) {
         super(xPos, yPos, width, height, TextComponent.EMPTY);
         this.screen = screen;
@@ -40,30 +39,36 @@ public class InformationButton extends AbstractWidget {
         this.minecraft = Minecraft.getInstance();
         this.font = this.minecraft.font;
     }
-
+    
     public boolean isVisible() {
         return this.visible;
     }
-
+    
     @Override
     public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+        this.isHovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width
+                && mouseY < this.y + this.height;
+        
         if (this.visible) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderTexture(0, Resources.INFORMATION);
             RenderSystem.disableDepthTest();
             blit(stack, this.x, this.y, 0, 0, this.width, this.height, 16, 16);
             RenderSystem.enableDepthTest();
-
-            if (this.isHovered && this.active) {
-                this.screen.renderTooltip(stack, this.onHover, this.optionalComponent, mouseX, mouseY);
-            }
         }
     }
     
+    @Override
+    public void renderToolTip(PoseStack stack, int mouseX, int mouseY) {
+        if (this.visible && this.isHovered) {
+            this.screen.renderTooltip(stack, this.onHover, this.optionalComponent, mouseX, mouseY);
+        }
+    }
+
     public void setVisible(boolean visible) {
         this.visible = visible;
     }
-    
+
     @Override
     public void updateNarration(NarrationElementOutput narration) {
         narration.add(NarratedElementType.HINT, new TranslatableComponent("narration.turtychemistry.information_button",

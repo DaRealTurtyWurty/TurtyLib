@@ -9,16 +9,20 @@ public final class ClientUtils {
     private ClientUtils() {
         throw new IllegalStateException("Attempted to construct utility class!");
     }
-    
+
     public static Font getFont() {
         return getMinecraft().font;
     }
-    
+
     public static Minecraft getMinecraft() {
         return Minecraft.getInstance();
     }
-
+    
     public static ResourceManager getResourceManager() {
         return getMinecraft().getResourceManager();
+    }
+
+    public static double mapNumber(double value, double rangeMin, double rangeMax, double resultMin, double resultMax) {
+        return (value - rangeMin) / (rangeMax - rangeMin) * (resultMax - resultMin) + resultMin;
     }
 }
