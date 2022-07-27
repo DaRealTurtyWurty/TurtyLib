@@ -10,7 +10,7 @@ import io.github.darealturtywurty.turtylib.client.util.ImageInfo;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 public class AnimatableTexture extends AbstractWidget {
@@ -22,7 +22,7 @@ public class AnimatableTexture extends AbstractWidget {
     private final int defaultFrameTime;
 
     public AnimatableTexture(int xPos, int yPos, ResourceLocation location) {
-        super(xPos, yPos, 16, 16, TextComponent.EMPTY);
+        super(xPos, yPos, 16, 16, Component.empty());
         this.textureLocation = location;
 
         final var imgInfo = new ImageInfo(location);
@@ -41,8 +41,7 @@ public class AnimatableTexture extends AbstractWidget {
             this.countTimeForFrames += timeOfLastFrame / 1000f;
 
             final int frametime = this.frameLengths.get(this.currentFrame) == null ? this.defaultFrameTime
-                    : this.frameLengths.get(this.currentFrame);
-            // System.out.println(frametime);
+                : this.frameLengths.get(this.currentFrame);
             if (this.countTimeForFrames >= 1f / frametime) {
                 this.countTimeForFrames = 0;
 
@@ -58,7 +57,7 @@ public class AnimatableTexture extends AbstractWidget {
             RenderSystem.defaultBlendFunc();
             RenderSystem.enableDepthTest();
             blit(stack, this.x, this.y, 0, this.width * this.currentFrame, this.width, this.height, this.imageWidth,
-                    this.imageHeight);
+                this.imageHeight);
         }
     }
     

@@ -10,32 +10,16 @@ import net.minecraftforge.items.ItemStackHandler;
 
 public class InventoryModule implements CapabilityModule<IItemHandlerModifiable> {
     protected final int size;
-
-    public final IItemHandlerModifiable inventory;
-    protected LazyOptional<IItemHandlerModifiable> handler;
     
+    private final IItemHandlerModifiable inventory;
+    protected LazyOptional<IItemHandlerModifiable> handler;
+
     public InventoryModule(ModularBlockEntity be, int size) {
         this.size = size;
         this.inventory = createInventory(be);
         this.handler = LazyOptional.of(() -> this.inventory);
     }
-
-    public IItemHandlerModifiable createInventory(ModularBlockEntity be) {
-        return new ItemStackHandler(this.size) {
-            @Override
-            public ItemStack extractItem(int slot, int amount, boolean simulate) {
-                be.update();
-                return super.extractItem(slot, amount, simulate);
-            }
-
-            @Override
-            public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-                be.update();
-                return super.insertItem(slot, stack, simulate);
-            }
-        };
-    }
-
+    
     @Override
     public void deserialize(ModularBlockEntity blockEntity, CompoundTag nbt) {
         final ListTag list = nbt.getList("Items", 10);
@@ -50,17 +34,17 @@ public class InventoryModule implements CapabilityModule<IItemHandlerModifiable>
             });
         }
     }
-
+    
     @Override
     public IItemHandlerModifiable getCapability() {
         return this.inventory;
     }
-
+    
     @Override
     public void invalidate() {
         this.handler.invalidate();
     }
-
+    
     @Override
     public void serialize(ModularBlockEntity blockEntity, CompoundTag nbt) {
         final var list = new ListTag();
@@ -72,7 +56,17 @@ public class InventoryModule implements CapabilityModule<IItemHandlerModifiable>
             stack.save(compound);
             list.add(compound);
         }
-
+        
         nbt.put("Items", list);
+    }
+    
+    protected IItemHandlerModifiable createInventory(ModularBlockEntity be) {
+        return new ItemStackHandler(this.size) {
+            @Override
+            protected void onContentsChanged(int slot) {
+                super.onContentsChanged(slot);
+                be.update();
+            }
+        };
     }
 }

@@ -15,8 +15,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
 public class InformationWidget extends AbstractWidget {
@@ -25,30 +23,30 @@ public class InformationWidget extends AbstractWidget {
     protected final Minecraft minecraft;
     protected final Font font;
     protected final Screen screen;
-    
+
     public InformationWidget(Screen screen, int xPos, int yPos, int width, int height, Component... hoverText) {
         this(screen, xPos, yPos, width, height, Optional.empty(), hoverText);
     }
-
+    
     public InformationWidget(Screen screen, int xPos, int yPos, int width, int height,
-            Optional<TooltipComponent> optionalComponent, Component... hoverText) {
-        super(xPos, yPos, width, height, TextComponent.EMPTY);
+        Optional<TooltipComponent> optionalComponent, Component... hoverText) {
+        super(xPos, yPos, width, height, Component.empty());
         this.screen = screen;
         this.optionalComponent = optionalComponent;
         this.onHover = List.of(hoverText);
         this.minecraft = Minecraft.getInstance();
         this.font = this.minecraft.font;
     }
-    
+
     public boolean isVisible() {
         return this.visible;
     }
-    
+
     @Override
     public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         this.isHovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width
-                && mouseY < this.y + this.height;
-        
+            && mouseY < this.y + this.height;
+
         if (this.visible) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderTexture(0, Resources.INFORMATION);
@@ -57,21 +55,21 @@ public class InformationWidget extends AbstractWidget {
             RenderSystem.enableDepthTest();
         }
     }
-    
+
     @Override
     public void renderToolTip(PoseStack stack, int mouseX, int mouseY) {
         if (this.visible && this.isHovered) {
             this.screen.renderTooltip(stack, this.onHover, this.optionalComponent, mouseX, mouseY);
         }
     }
-
+    
     public void setVisible(boolean visible) {
         this.visible = visible;
     }
-
+    
     @Override
     public void updateNarration(NarrationElementOutput narration) {
-        narration.add(NarratedElementType.HINT, new TranslatableComponent("narration.turtychemistry.information_button",
-                (Object[]) this.onHover.toArray(new Component[0])));
+        narration.add(NarratedElementType.HINT, Component.translatable("narration.turtychemistry.information_button",
+            (Object[]) this.onHover.toArray(new Component[0])));
     }
 }

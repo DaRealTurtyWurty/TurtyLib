@@ -13,7 +13,7 @@ import io.github.darealturtywurty.turtylib.client.util.ClientUtils;
 import io.github.darealturtywurty.turtylib.client.util.Resources;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 public class Popout extends Screen {
@@ -24,9 +24,9 @@ public class Popout extends Screen {
     @Nonnull
     private final Runnable onClose;
     private final List<AbstractWidget> tempWidgets = new ArrayList<>();
-
+    
     public Popout(int xPos, int yPos, int width, int height, RenderFunction renderFunc, Runnable onClose) {
-        super(TextComponent.EMPTY);
+        super(Component.empty());
         this.minecraft = ClientUtils.getMinecraft();
         this.font = this.minecraft.font;
         this.x = xPos;
@@ -37,59 +37,59 @@ public class Popout extends Screen {
         this.visible = false;
         this.onClose = onClose;
     }
-    
+
     public Popout(int xPos, int yPos, int width, int height, Runnable onClose) {
         this(xPos, yPos, width, height, RenderFunction.NONE, onClose);
     }
-    
+
     public void addWidgets(AbstractWidget... widgets) {
         Collections.addAll(this.tempWidgets, widgets);
     }
-    
+
     public int getLeftPos() {
         return this.leftPos;
     }
-    
+
     public int getTopPos() {
         return this.topPos;
     }
-
+    
     public boolean isActive() {
         return this.active;
     }
-
+    
     @Override
     public boolean isPauseScreen() {
         return false;
     }
-
+    
     public boolean isVisible() {
         return this.visible;
     }
-    
+
     @Override
     public void onClose() {
         super.onClose();
         this.onClose.run();
     }
-
+    
     @Override
     public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         if (this.visible) {
             this.renderBackground(stack);
             RenderSystem.setShaderTexture(0, this.textureLoc);
             blit(stack, this.x, this.y, 0, 0, this.width, this.height);
-            
-            super.render(stack, mouseX, mouseY, partialTicks);
 
+            super.render(stack, mouseX, mouseY, partialTicks);
+            
             this.renderFunc.render(stack, mouseX, mouseY, partialTicks);
         }
     }
-
+    
     public void setActive(boolean active) {
         this.active = active;
     }
-
+    
     public void setVisible(boolean visible) {
         this.visible = visible;
         if (visible) {
@@ -98,12 +98,12 @@ public class Popout extends Screen {
             this.minecraft.popGuiLayer();
         }
     }
-
+    
     @Override
     public boolean shouldCloseOnEsc() {
         return true;
     }
-
+    
     @Override
     protected void init() {
         super.init();
@@ -111,12 +111,12 @@ public class Popout extends Screen {
             addRenderableWidget(widget);
         }
     }
-    
+
     @FunctionalInterface
     public interface RenderFunction {
         RenderFunction NONE = (stack, mouseX, mouseY, partialTicks) -> {
         };
-        
+
         void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks);
     }
 }

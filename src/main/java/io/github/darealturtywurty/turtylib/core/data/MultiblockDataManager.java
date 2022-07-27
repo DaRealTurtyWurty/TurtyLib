@@ -27,14 +27,14 @@ public class MultiblockDataManager extends SimpleJsonDataManager<MultiblockData>
     public MultiblockDataManager() {
         super("multiblocks", MultiblockData.class);
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     protected MultiblockData getJsonAsData(ResourceLocation location, JsonElement json) {
         final var layers = new HashMap<Integer, List<String>>();
         final var keys = new HashMap<String, List<BlockState>>();
         final JsonObject main = json.getAsJsonObject();
-
+        
         final JsonObject keysObj = main.getAsJsonObject("keys");
         keysObj.entrySet().forEach(entry -> {
             final String key = entry.getKey();
@@ -45,14 +45,14 @@ public class MultiblockDataManager extends SimpleJsonDataManager<MultiblockData>
                 final JsonObject blockOption = option.getAsJsonObject();
                 final String name = blockOption.get("name").getAsString();
                 final Optional<Block> optionBlock = ForgeRegistries.BLOCKS.getEntries().stream()
-                        .filter(etry -> etry.getKey().getRegistryName().toString().equalsIgnoreCase(name))
-                        .map(Map.Entry::getValue).findFirst();
+                    .filter(etry -> etry.getKey().toString().equalsIgnoreCase(name)).map(Map.Entry::getValue)
+                    .findFirst();
                 final var atomicBlock = new AtomicReference<Block>();
                 optionBlock.ifPresentOrElse(atomicBlock::set, () -> {
                     throw new JsonParseException(
-                            "JSON at: '" + location + "' references block: '" + name + "' which does not exist!");
+                        "JSON at: '" + location + "' references block: '" + name + "' which does not exist!");
                 });
-
+                
                 final Block block = atomicBlock.get();
                 final BlockState state = block.defaultBlockState();
                 final StateDefinition stateDef = block.getStateDefinition();
@@ -61,11 +61,10 @@ public class MultiblockDataManager extends SimpleJsonDataManager<MultiblockData>
                     final String propertyStr = ery.getKey();
                     final JsonElement propertyVal = ery.getValue();
                     if (!propertyVal.isJsonPrimitive())
-                        throw new JsonParseException(
-                                "JSON at: '" + location + "' references a value for property name: '" + propertyStr
-                                        + "' for block name: '" + name + "' for defined key '" + key
-                                        + "', however is not a valid integer, boolean or string!");
-
+                        throw new JsonParseException("JSON at: '" + location
+                            + "' references a value for property name: '" + propertyStr + "' for block name: '" + name
+                            + "' for defined key '" + key + "', however is not a valid integer, boolean or string!");
+                    
                     final JsonPrimitive primitiveVal = propertyVal.getAsJsonPrimitive();
                     final Property property = stateDef.getProperty(propertyStr);
                     if (primitiveVal.isBoolean() && property instanceof final BooleanProperty boolProperty) {
@@ -76,19 +75,19 @@ public class MultiblockDataManager extends SimpleJsonDataManager<MultiblockData>
                         final Optional<? extends Enum> val = enumProperty.getValue(primitiveVal.getAsString());
                         if (!val.isPresent())
                             throw new JsonParseException(
-                                    "JSON at: '" + location + "' references value: '" + primitiveVal.getAsString()
-                                            + " for property name: '" + propertyStr + "' for block name: '" + name
-                                            + "' for defined key: '" + key + "', but it does not exist!");
+                                "JSON at: '" + location + "' references value: '" + primitiveVal.getAsString()
+                                    + " for property name: '" + propertyStr + "' for block name: '" + name
+                                    + "' for defined key: '" + key + "', but it does not exist!");
                         state.setValue(enumProperty, val.get());
                     }
                 });
-
+                
                 blockList.add(state);
             });
-
+            
             keys.put(key, blockList);
         });
-
+        
         final JsonObject layersObj = main.getAsJsonObject("layers");
         layersObj.entrySet().forEach(entry -> {
             final String key = entry.getKey();
@@ -99,16 +98,16 @@ public class MultiblockDataManager extends SimpleJsonDataManager<MultiblockData>
                 for (final char c : layerStr.toCharArray()) {
                     if (!keys.containsKey(String.valueOf(c)) && !Character.isWhitespace(c))
                         throw new JsonParseException(
-                                "JSON at: '" + location + "' is missing a defintion for key: '" + c + "'");
+                            "JSON at: '" + location + "' is missing a defintion for key: '" + c + "'");
                 }
-
+                
                 layerList.add(layer.getAsString());
             });
             layers.put(Integer.parseInt(key), layerList);
         });
-
+        
         final String controllerKey = main.get("controller").getAsString();
-
+        
         return new MultiblockData(layers, keys, controllerKey);
     }
 }

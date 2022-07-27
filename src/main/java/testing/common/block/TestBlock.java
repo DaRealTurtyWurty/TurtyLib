@@ -1,5 +1,6 @@
 package testing.common.block;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -12,6 +13,9 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
+import testing.client.screen.TestScreen;
 import testing.common.blockentity.TestBlockEntity;
 
 public class TestBlock extends Block implements EntityBlock {
@@ -21,27 +25,27 @@ public class TestBlock extends Block implements EntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state,
-            BlockEntityType<T> type) {
-        return level.isClientSide ? null : (level0, pos, state0, blockEntity) -> ((TestBlockEntity) blockEntity).tick();
+        BlockEntityType<T> type) {
+        return ($0, $1, $2, be) -> {
+            if (!level.isClientSide()) {
+                ((TestBlockEntity) be).tick();
+            }
+        };
     }
 
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new TestBlockEntity(pos, state);
     }
-    
+
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
-            BlockHitResult result) {
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof final TestBlockEntity test) {
-            if (!player.isCrouching()) {
-                test.inventory.inventory.insertItem(0, player.getItemInHand(hand), false);
-            } else {
-                System.out.println(test.inventory.inventory.getStackInSlot(0));
-            }
-
+        BlockHitResult result) {
+        if (level.isClientSide && level.getBlockEntity(pos) instanceof final TestBlockEntity be) {
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+                () -> () -> Minecraft.getInstance().setScreen(new TestScreen(be, TestBlockEntity.TITLE)));
         }
         
-        return InteractionResult.SUCCESS;
+        return InteractionResult.sidedSuccess(level.isClientSide);
     }
 }

@@ -6,7 +6,8 @@ import java.util.Set;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import io.github.darealturtywurty.turtylib.client.util.ClientUtils;
+import io.github.darealturtywurty.turtylib.client.util.MathUtils;
+import net.minecraft.network.chat.Component;
 
 public abstract class BookWidget {
     public final Set<PagePosition> allowedPositions = new HashSet<>();
@@ -15,9 +16,10 @@ public abstract class BookWidget {
     private boolean visible;
     private final Page page;
 
-    public BookWidget(int width, int height) {
+    protected BookWidget(int width, int height) {
         this.width = width;
         this.height = height;
+        this.page = new Page(Component.empty());
     }
 
     public int calculateRelativeX(AdvancedBookScreen screen) {
@@ -27,20 +29,20 @@ public abstract class BookWidget {
         // left page
         int mappedX = 0;
         if (screen.pages.get(screen.currentPage).equals(this.page)) {
-            mappedX = (int) ClientUtils.mapNumber(this.position.x, 0, 1, 0, screen.leftPageWidth);
+            mappedX = MathUtils.mapToInt(this.position.x, 0, 1, 0, screen.leftPageWidth);
         }
         
         // right page
         else {
-            mappedX = (int) ClientUtils.mapNumber(this.position.x, 0, 1, screen.imageWidth - screen.rightPageWidth,
-                    screen.imageWidth);
+            mappedX = MathUtils.mapToInt(this.position.x, 0, 1, screen.imageWidth - screen.rightPageWidth,
+                screen.imageWidth);
         }
         
         return screen.leftPos + mappedX;
     }
 
     public int calculateRelativeY(AdvancedBookScreen screen) {
-        final int mappedY = (int) ClientUtils.mapNumber(this.position.y, 0, 1, 0, screen.imageHeight);
+        final int mappedY = MathUtils.mapToInt(this.position.y, 0, 1, 0, screen.imageHeight);
         return screen.topPos + mappedY;
     }
     

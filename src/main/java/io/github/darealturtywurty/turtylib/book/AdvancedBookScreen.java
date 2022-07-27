@@ -71,10 +71,10 @@ public class AdvancedBookScreen extends Screen {
         RenderSystem.setShaderTexture(0, page.texture);
         if (this.currentPage % 2 == 1) {
             blit(stack, this.leftPos, this.topPos, 0, 0,
-                    isCover() ? this.imageWidth : this.imageWidth - this.leftPageWidth, this.imageHeight);
+                isCover() ? this.imageWidth : this.imageWidth - this.leftPageWidth, this.imageHeight);
         } else {
             blit(stack, this.leftPos + this.leftPageWidth + this.binderWidth, this.topPos, this.leftPageWidth, 0,
-                    this.rightPageWidth, this.imageHeight);
+                this.rightPageWidth, this.imageHeight);
         }
     }
     
@@ -87,13 +87,13 @@ public class AdvancedBookScreen extends Screen {
         if (isCover()) {
             final ResourceLocation pageTexture = this.pages.get(this.currentPage).texture;
             try {
-                final Resource resource = this.resourceManager.getResource(pageTexture);
-                final var pngInfo = new PngInfo(resource.toString(), resource.getInputStream());
+                final Resource resource = this.resourceManager.getResource(pageTexture).get();
+                final var pngInfo = new PngInfo(resource::toString, resource.open());
                 this.imageWidth = pngInfo.width;
                 this.imageHeight = pngInfo.height;
             } catch (final IOException exception) {
                 throw new IllegalStateException(
-                        "There was an issue getting the information for resource: " + pageTexture, exception);
+                    "There was an issue getting the information for resource: " + pageTexture, exception);
             }
             return;
         }
@@ -102,20 +102,20 @@ public class AdvancedBookScreen extends Screen {
         final ResourceLocation binderTexture = this.pages.get(this.currentPage).binderTexture;
         final ResourceLocation rightPageTexture = this.pages.get(this.currentPage + 1).texture;
         try {
-            final Resource leftPageResource = this.resourceManager.getResource(leftPageTexture);
-            final var leftPagePngInfo = new PngInfo(leftPageResource.toString(), leftPageResource.getInputStream());
+            final Resource leftPageResource = this.resourceManager.getResource(leftPageTexture).get();
+            final var leftPagePngInfo = new PngInfo(leftPageResource::toString, leftPageResource.open());
             this.leftPageWidth = leftPagePngInfo.width;
 
-            final Resource binderResource = this.resourceManager.getResource(binderTexture);
-            final var binderPngInfo = new PngInfo(binderResource.toString(), binderResource.getInputStream());
+            final Resource binderResource = this.resourceManager.getResource(binderTexture).get();
+            final var binderPngInfo = new PngInfo(binderResource::toString, binderResource.open());
             this.binderWidth = binderPngInfo.width;
 
-            final Resource rightPageResource = this.resourceManager.getResource(rightPageTexture);
-            final var rightPagePngInfo = new PngInfo(rightPageResource.toString(), rightPageResource.getInputStream());
+            final Resource rightPageResource = this.resourceManager.getResource(rightPageTexture).get();
+            final var rightPagePngInfo = new PngInfo(rightPageResource::toString, rightPageResource.open());
             this.rightPageWidth = rightPagePngInfo.width;
         } catch (final IOException exception) {
             throw new IllegalStateException("There was an issue getting the information for resource: "
-                    + leftPageTexture + " or " + binderTexture + " or " + rightPageTexture, exception);
+                + leftPageTexture + " or " + binderTexture + " or " + rightPageTexture, exception);
         }
     }
 }

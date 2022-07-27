@@ -7,6 +7,7 @@ import java.util.List;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import io.github.darealturtywurty.turtylib.client.util.GuiUtils;
+import io.github.darealturtywurty.turtylib.client.util.MathUtils;
 
 public class GroupedTab extends Tab {
     public static final int WHITESPACE = 2;
@@ -29,7 +30,7 @@ public class GroupedTab extends Tab {
         boolean tabsHovered = false;
         final int offset = getOffset();
         final int height = offset + 20 + WHITESPACE * this.subTabs.size();
-        if (GuiUtils.isMouseInArea(mouseX, mouseY, this.x + this.width, this.subTabs.get(0).y, this.width, offset)) {
+        if (MathUtils.isWithinArea(mouseX, mouseY, this.x + this.width, this.subTabs.get(0).y, this.width, offset)) {
             tabsHovered = true;
         }
         

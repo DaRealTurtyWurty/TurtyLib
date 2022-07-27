@@ -1,0 +1,42 @@
+    @SuppressWarnings("resource")
+    private void createWorldWidget() {
+        final Level level = ClientUtils.getMinecraft().level;
+        final int topWorld = level.getMaxBuildHeight();
+        final int bottomWorld = level.getMinBuildHeight() - 1;
+        final int totalHeight = topWorld - bottomWorld;
+        final WorldPreviewWidget worldPreview = addRenderableWidget(
+            new WorldPreviewWidget(0, 0, 380, totalHeight, 380, totalHeight));
+        final BlockPos pos = this.blockEntity.getBlockPos();
+        int x = 0;
+        for (int relX = pos.getX() - 189; relX < pos.getX() + 189; relX++) {
+            for (int relY = topWorld; relY > bottomWorld; relY--) {
+                final var currentPos = new BlockPos(relX, relY, pos.getZ());
+                final BlockState state = level.getBlockState(currentPos);
+                int color = convertARGBToABGR(WorldPreviewWidget.getAverageBlockColor(state, currentPos));
+                final int biomeColor = Minecraft.getInstance().getBlockColors().getColor(state, level, currentPos, 0);
+                final int mainAlpha = 0xFF;
+                int mainBlue = color >> 16 & 0xFF;
+                int mainGreen = color >> 8 & 0xFF;
+                int mainRed = color & 0xFF;
+                if (biomeColor != -1 && biomeColor != state.getMapColor(level, pos).col) {
+                    final int biomeRed = biomeColor >> 16 & 0xFF;
+                    final int biomeGreen = biomeColor >> 8 & 0xFF;
+                    final int biomeBlue = biomeColor & 0xFF;
+
+                    mainBlue *= biomeBlue / 255f;
+                    mainGreen *= biomeGreen / 255f;
+                    mainRed *= biomeRed / 255f;
+                }
+                
+                color = mainAlpha << 24 | mainBlue << 16 | mainGreen << 8 | mainRed;
+                
+                worldPreview.setPixels(x, topWorld - relY, state.isAir() ? 0xFF000000 : color);
+            }
+
+            x++;
+        }
+        
+        worldPreview.upload();
+        
+        worldPreview.active = false;
+    }

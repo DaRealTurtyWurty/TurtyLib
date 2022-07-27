@@ -19,33 +19,34 @@ public class ImageInfo {
     public final int width, height;
     public final boolean hasMetadata;
     public final Optional<AnimationData> animationData;
-    
+
     public ImageInfo(ResourceLocation textureLoc) {
         try {
-            this.resource = ClientUtils.getResourceManager().getResource(textureLoc);
-            this.pngInfo = new PngInfo(this.resource.toString(), this.resource.getInputStream());
+            this.resource = ClientUtils.getResourceManager().getResource(textureLoc).get();
+            this.pngInfo = new PngInfo(this.resource::toString, this.resource.open());
             this.width = this.pngInfo.width;
             this.height = this.pngInfo.height;
-            this.hasMetadata = this.resource.hasMetadata();
+            this.hasMetadata = this.resource.metadata() != null;
             if (this.hasMetadata) {
-                this.animationData = Optional.of(new AnimationData(
-                        this.resource.getMetadata(AnimationMetadataSection.SERIALIZER), this.width, this.height));
+                this.animationData = Optional.of(
+                    new AnimationData(this.resource.metadata().getSection(AnimationMetadataSection.SERIALIZER).get(),
+                        this.width, this.height));
             } else {
                 this.animationData = Optional.empty();
             }
         } catch (final IOException exception) {
             throw new IllegalStateException(
-                    "There was an issue reading the file or it's metadata at location: " + textureLoc.toString(),
-                    exception);
+                "There was an issue reading the file or it's metadata at location: " + textureLoc.toString(),
+                exception);
         }
     }
-
+    
     public static final class AnimationData {
         public final AnimationMetadataSection metadata;
         public final int frameWidth, frameHeight, frameCount, frameTime;
         public final boolean isInterpolated;
         public final Map<Integer, Integer> frameRates;
-        
+
         private AnimationData(AnimationMetadataSection metadata, int imgWidth, int imgHeight) {
             this.metadata = metadata;
             final Pair<Integer, Integer> widthHeight = metadata.getFrameSize(imgWidth, imgHeight);
