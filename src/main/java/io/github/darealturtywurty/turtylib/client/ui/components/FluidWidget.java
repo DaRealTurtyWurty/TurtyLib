@@ -16,8 +16,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraftforge.client.IFluidTypeRenderProperties;
-import net.minecraftforge.client.RenderProperties;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 
@@ -110,8 +109,8 @@ public class FluidWidget extends AbstractWidget {
     public void setFluid(FluidStack fluid) {
         this.info.fluidStack = fluid;
         this.info.attribs = fluid.getFluid().getFluidType();
-        this.info.renderProps = RenderProperties.get(this.info.fluidStack.getFluid());
-        this.info.color = ClientUtils.ARGBtoRGBA(this.info.renderProps.getColorTint(fluid));
+        this.info.renderProps = IClientFluidTypeExtensions.of(this.info.fluidStack.getFluid());
+        this.info.color = ClientUtils.ARGBtoRGBA(this.info.renderProps.getTintColor(fluid));
         setFlowing(this.info.flowing);
         this.info.scaledWidth = (int) (this.width / (this.maximum / (float) fluid.getAmount()));
         this.info.scaledHeight = (int) (this.height / (this.maximum / (float) fluid.getAmount()));
@@ -132,7 +131,7 @@ public class FluidWidget extends AbstractWidget {
     public static class FluidInfo {
         private FluidType attribs;
         private FluidStack fluidStack;
-        private IFluidTypeRenderProperties renderProps;
+        private IClientFluidTypeExtensions renderProps;
         private int loopX, loopY;
         private Vector4f color;
         private TextureAtlasSprite texture;
@@ -160,7 +159,7 @@ public class FluidWidget extends AbstractWidget {
             return this.loopY;
         }
 
-        public IFluidTypeRenderProperties getRenderProps() {
+        public IClientFluidTypeExtensions getRenderProps() {
             return this.renderProps;
         }
 
@@ -208,7 +207,7 @@ public class FluidWidget extends AbstractWidget {
             this.loopY = loopY;
         }
 
-        public void setRenderProps(IFluidTypeRenderProperties renderProps) {
+        public void setRenderProps(IClientFluidTypeExtensions renderProps) {
             this.renderProps = renderProps;
         }
 

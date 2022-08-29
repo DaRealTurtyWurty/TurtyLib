@@ -20,7 +20,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.monster.Blaze;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.client.gui.widget.ExtendedButton;
 import net.minecraftforge.fluids.FluidStack;
@@ -81,9 +81,8 @@ public class TestScreen extends Screen {
                 Map.of(Component.literal("Testa"), 5, Component.literal("Testb"), 1, Component.literal("Testc"), 15))));
 
         this.entity = addWidget(
-            new EntityWidget.Builder(new EnderDragon(EntityType.ENDER_DRAGON, Minecraft.getInstance().level),
-                this.xPos + 40, this.yPos + 25, 100, 100).rotationSpeed(5).offset(5f, -7.5f, 0).scale(10f, 10f, 10f)
-                    .build());
+            new EntityWidget.Builder(new Blaze(EntityType.BLAZE, Minecraft.getInstance().level), this.xPos + 40,
+                this.yPos + 25, 100, 100).rotationSpeed(0).offset(5f, -7.5f, 0).scale(10f, 10f, 10f).build());
     }
 
     private void renderBg(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
@@ -98,6 +97,6 @@ public class TestScreen extends Screen {
         // this.testButton.render(stack, mouseX, mouseY, partialTicks);
         // this.lineGraph.render(stack, mouseX, mouseY, partialTicks);
         // this.barChart.render(stack, mouseX, mouseY, partialTicks);
-        // this.entity.render(stack, mouseX, mouseY, partialTicks);
+        this.entity.render(stack, mouseX, mouseY, partialTicks);
     }
 }

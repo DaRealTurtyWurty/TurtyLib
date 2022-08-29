@@ -16,10 +16,10 @@ public class EntityWidget extends AbstractWidget {
     private float rotation = 135;
     private float rotationSpeed;
     private Vec3 defaultRotation, scale, offset;
-
+    
     private EntityWidget(Builder builder) {
         super(builder.xPos, builder.yPos, builder.width, builder.height, Component.empty());
-
+        
         this.minecraft = Minecraft.getInstance();
         this.entity = builder.entity;
         this.rotationSpeed = builder.rotationSpeed;
@@ -33,13 +33,15 @@ public class EntityWidget extends AbstractWidget {
         if (this.rotationSpeed != 0) {
             this.rotation += partialTicks * this.rotationSpeed;
         }
-
+        
+        this.entity.tick();
+        
         GuiUtils.renderEntity(stack, this.entity,
             this.rotationSpeed != 0 ? new Vec3(this.defaultRotation.x(), this.rotation, this.defaultRotation.z())
                 : this.defaultRotation,
-            this.scale, this.offset, this.x, this.y);
+            this.scale, this.offset, this.x, this.y, partialTicks);
     }
-
+    
     @Override
     public void updateNarration(NarrationElementOutput narration) {
         defaultButtonNarrationText(narration);
@@ -51,7 +53,7 @@ public class EntityWidget extends AbstractWidget {
             offset = new Vec3(-1.25f, -1.75f, 0);
         private Entity entity;
         private int xPos, yPos, width, height;
-
+        
         public Builder(Entity entity, int xPos, int yPos, int width, int height) {
             this.entity = entity;
             this.xPos = xPos;
@@ -59,26 +61,26 @@ public class EntityWidget extends AbstractWidget {
             this.width = width;
             this.height = height;
         }
-
+        
         public EntityWidget build() {
             return new EntityWidget(this);
         }
-
+        
         public Builder defaultRotation(float x, float y, float z) {
             this.defaultRotation = new Vec3(x, y, z);
             return this;
         }
-
+        
         public Builder offset(float x, float y, float z) {
             this.offset = new Vec3(-x, y, z);
             return this;
         }
-
+        
         public Builder rotationSpeed(float rotationSpeed) {
             this.rotationSpeed = rotationSpeed;
             return this;
         }
-
+        
         public Builder scale(float x, float y, float z) {
             this.scale = new Vec3(x, y, z);
             return this;

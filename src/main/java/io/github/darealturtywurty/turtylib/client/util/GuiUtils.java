@@ -118,7 +118,7 @@ public final class GuiUtils {
     }
 
     public static void renderEntity(PoseStack stack, Entity entity, Vec3 rotation, Vec3 scale, Vec3 offset, int xPos,
-        int yPos) {
+        int yPos, float partialTicks) {
         stack.pushPose();
         stack.translate(xPos, yPos, 1050.0F);
         stack.scale(1.0F, 1.0F, -1.0F);
@@ -131,7 +131,7 @@ public final class GuiUtils {
         final EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
         final MultiBufferSource.BufferSource buffer = MultiBufferSource
             .immediate(Tesselator.getInstance().getBuilder());
-        render(renderManager, entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, stack, buffer, 15728880);
+        render(renderManager, entity, 0.0D, 0.0D, 0.0D, 0.0F, partialTicks, stack, buffer, 15728880);
         buffer.endBatch();
         stack.popPose();
     }

@@ -9,7 +9,7 @@ import testing.common.blockentity.TestBlockEntity;
 
 public final class BlockEntityInit {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister
-            .create(ForgeRegistries.BLOCK_ENTITIES, TestMod.MODID);
+            .create(ForgeRegistries.BLOCK_ENTITY_TYPES, TestMod.MODID);
 
     public static final RegistryObject<BlockEntityType<TestBlockEntity>> TEST = BLOCK_ENTITIES.register("test",
             () -> BlockEntityType.Builder.of(TestBlockEntity::new, BlockInit.TEST.get()).build(null));
