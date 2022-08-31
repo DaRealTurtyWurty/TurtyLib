@@ -17,6 +17,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import testing.client.screen.TestScreen;
 import testing.common.blockentity.TestBlockEntity;
+import io.github.darealturtywurty.turtylib.common.blockentity.TickableBlockEntity;
 
 public class TestBlock extends Block implements EntityBlock {
     public TestBlock(Properties properties) {
@@ -26,11 +27,7 @@ public class TestBlock extends Block implements EntityBlock {
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state,
         BlockEntityType<T> type) {
-        return ($0, $1, $2, be) -> {
-            if (!level.isClientSide()) {
-                ((TestBlockEntity) be).tick();
-            }
-        };
+        return level.isClientSide() ? null : ($0, $1, $2, blockEntity) -> ((TickableBlockEntity)blockEntity).tick();
     }
 
     @Override
@@ -41,11 +38,11 @@ public class TestBlock extends Block implements EntityBlock {
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
         BlockHitResult result) {
-        if (level.isClientSide && level.getBlockEntity(pos) instanceof final TestBlockEntity be) {
+        if (level.isClientSide() && level.getBlockEntity(pos) instanceof final TestBlockEntity be) {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                 () -> () -> Minecraft.getInstance().setScreen(new TestScreen(be, TestBlockEntity.TITLE)));
         }
         
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.sidedSuccess(level.isClientSide());
     }
 }
