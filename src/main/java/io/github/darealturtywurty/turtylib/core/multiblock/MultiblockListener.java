@@ -4,16 +4,20 @@ import io.github.darealturtywurty.turtylib.TurtyLib;
 import io.github.darealturtywurty.turtylib.common.blockentity.ModularBlockEntity;
 import io.github.darealturtywurty.turtylib.common.blockentity.module.MultiblockModule;
 import io.github.darealturtywurty.turtylib.core.init.BlockInit;
+import io.github.darealturtywurty.turtylib.core.network.PacketHandler;
+import io.github.darealturtywurty.turtylib.core.network.clientbound.CSyncMultiblockPositionsPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.network.PacketDistributor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,17 +55,19 @@ public final class MultiblockListener {
 
             // Cache the width, height, and depth of the multi-block's pattern, so it doesn't have to call it every cycle of the loop
             final int multiBlockWidth = multiblock.getPatternMatcher().getWidth();
-            final int multiBlockHeight = multiblock.getPatternMatcher().getHeight();
-            final int multiBlockDepth = multiblock.getPatternMatcher().getDepth();
+            final int multiBlockHeight = multiblock.getPatternMatcher().getDepth();
+            final int multiBlockDepth = multiblock.getPatternMatcher().getHeight();
             for(int x = 0; x < multiBlockWidth; x++) {
                 for(int y = 0; y < multiBlockHeight; y++) {
                     for(int z = 0; z < multiBlockDepth; z++) {
-                        BlockPos pos = match.getBlock(x, y, z).getPos();
+                        BlockInWorld inWorld = match.getBlock(x, z, y);
+                        BlockPos pos = inWorld.getPos();
                         level.setBlock(pos, BlockInit.MULTIBLOCK.get().defaultBlockState(), Block.UPDATE_ALL);
                         positions.add(pos);
                     }
                 }
             }
+
             event.getLevel().setBlock(controllerPosition, controller.getValue(), Block.UPDATE_ALL);
             if(event.getLevel().getBlockEntity(controllerPosition) instanceof ModularBlockEntity modularBlockEntity) {
                 MultiblockModule multiblockModule = modularBlockEntity.getModule(MultiblockModule.class).orElseThrow(

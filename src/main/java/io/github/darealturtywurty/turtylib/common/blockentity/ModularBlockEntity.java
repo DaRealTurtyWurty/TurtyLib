@@ -1,11 +1,12 @@
 package io.github.darealturtywurty.turtylib.common.blockentity;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import io.github.darealturtywurty.turtylib.common.blockentity.module.CapabilityModule;
 import io.github.darealturtywurty.turtylib.common.blockentity.module.Module;
 import io.github.darealturtywurty.turtylib.common.blockentity.module.ModuleList;
+import io.github.darealturtywurty.turtylib.core.network.PacketHandler;
+import io.github.darealturtywurty.turtylib.core.network.serverbound.SClientBlockEntityLoadPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -29,6 +30,10 @@ public class ModularBlockEntity extends TickableBlockEntity {
     @SuppressWarnings("unchecked")
     public <T extends Module> Optional<T> getModule(Class<T> moduleClass) {
         return this.modules.stream().filter(moduleClass::isInstance).map(it -> (T)it).findFirst();
+    }
+
+    public <T extends Module> boolean hasModule(Class<T> moduleClass) {
+        return this.modules.stream().anyMatch(moduleClass::isInstance);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -55,6 +60,13 @@ public class ModularBlockEntity extends TickableBlockEntity {
     public void onLoad() {
         super.onLoad();
         this.modules.onLoad(this);
+
+        if(this.level == null)
+            return;
+
+        if(this.level.isClientSide()) {
+            PacketHandler.CHANNEL.sendToServer(new SClientBlockEntityLoadPacket(this.worldPosition));
+        }
     }
 
     @Override

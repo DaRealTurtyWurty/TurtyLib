@@ -15,3 +15,10 @@ license="LGPL-3.0"
 	description='''
     A library mod for Minecraft Forge with multiple utilities. Primarily used for Turty's Chemistry.
 	'''
+
+#[[mods]]
+#	modId="testmod"
+#	version="1.0"
+#	displayName="Test Mod"
+#	description='''
+#	'''
