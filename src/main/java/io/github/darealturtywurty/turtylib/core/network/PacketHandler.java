@@ -2,6 +2,7 @@ package io.github.darealturtywurty.turtylib.core.network;
 
 import io.github.darealturtywurty.turtylib.TurtyLib;
 import io.github.darealturtywurty.turtylib.core.init.AbstractInit;
+import io.github.darealturtywurty.turtylib.core.network.clientbound.CSyncControllerPositionPacket;
 import io.github.darealturtywurty.turtylib.core.network.clientbound.CSyncMultiblockPositionsPacket;
 import io.github.darealturtywurty.turtylib.core.network.serverbound.SClientBlockEntityLoadPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -24,6 +25,9 @@ public final class PacketHandler extends AbstractInit {
             CHANNEL.messageBuilder(SClientBlockEntityLoadPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
                             .encoder(SClientBlockEntityLoadPacket::encode).decoder(SClientBlockEntityLoadPacket::new)
                             .consumerMainThread(SClientBlockEntityLoadPacket::handle).add();
+            CHANNEL.messageBuilder(CSyncControllerPositionPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                            .encoder(CSyncControllerPositionPacket::encode).decoder(CSyncControllerPositionPacket::new)
+                            .consumerMainThread(CSyncControllerPositionPacket::handle).add();
             TurtyLib.LOGGER.info("Registered {} packets!", index);
         }
 }

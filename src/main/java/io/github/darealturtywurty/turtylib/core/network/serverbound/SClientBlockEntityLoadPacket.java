@@ -1,8 +1,10 @@
 package io.github.darealturtywurty.turtylib.core.network.serverbound;
 
 import io.github.darealturtywurty.turtylib.common.blockentity.ModularBlockEntity;
+import io.github.darealturtywurty.turtylib.common.blockentity.MultiblockBlockEntity;
 import io.github.darealturtywurty.turtylib.common.blockentity.module.MultiblockModule;
 import io.github.darealturtywurty.turtylib.core.network.PacketHandler;
+import io.github.darealturtywurty.turtylib.core.network.clientbound.CSyncControllerPositionPacket;
 import io.github.darealturtywurty.turtylib.core.network.clientbound.CSyncMultiblockPositionsPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -43,6 +45,8 @@ public class SClientBlockEntityLoadPacket {
             MultiblockModule multiblockModule = modularBlockEntity.getModule(MultiblockModule.class).orElseThrow(
                     () -> new IllegalStateException("Controller does not container a multiblock module!"));
             PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(), new CSyncMultiblockPositionsPacket(this.position, multiblockModule.getPositions()));
+        } else if(level.getBlockEntity(this.position) instanceof MultiblockBlockEntity multiblockBlockEntity) {
+            PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(), new CSyncControllerPositionPacket(this.position, multiblockBlockEntity.getController()));
         }
     }
 }

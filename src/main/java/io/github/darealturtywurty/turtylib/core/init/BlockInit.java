@@ -13,5 +13,5 @@ public final class BlockInit extends AbstractInit {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, TurtyLib.MODID);
 
     public static final RegistryObject<MultiblockBlock> MULTIBLOCK = BLOCKS.register("multiblock",
-            () -> new MultiblockBlock(BlockBehaviour.Properties.of(Material.AIR).air().noLootTable().noOcclusion().dynamicShape()));
+            () -> new MultiblockBlock(BlockBehaviour.Properties.of(Material.AIR).noLootTable().noOcclusion().dynamicShape()));
 }
