@@ -1,6 +1,7 @@
 package io.github.darealturtywurty.turtylib.core.multiblock;
 
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
@@ -16,11 +17,13 @@ public class Multiblock {
     private final BlockPattern patternMatcher;
     private final List<Predicate<BlockState>> validStates;
     private final Pair<Vec3i, BlockState> controller;
+    private final UseFunction useFunction;
 
     public Multiblock(Builder builder) {
         this.patternMatcher = builder.pattern;
         this.validStates = builder.validStates.stream().toList();
         this.controller = builder.controller;
+        this.useFunction = builder.useFunction;
     }
 
     public final List<Predicate<BlockState>> getValidStates() {
@@ -39,10 +42,15 @@ public class Multiblock {
         return this.controller;
     }
 
+    public UseFunction getUseFunction() {
+        return this.useFunction;
+    }
+
     public static class Builder {
         private BlockPattern pattern;
         private final Set<Predicate<BlockState>> validStates = new HashSet<>();
         private Pair<Vec3i, BlockState> controller;
+        private UseFunction useFunction = ($0, $1, $2, $3, $5, $6, $7) -> InteractionResult.PASS;
 
         public final class Pattern {
             private Pattern() {}
@@ -88,6 +96,11 @@ public class Multiblock {
                 throw new IndexOutOfBoundsException("'z' is out of the range of this multiblock. The depth is: " + this.pattern.getDepth());
 
             this.controller = Pair.of(new Vec3i(x, y, z), state);
+            return this;
+        }
+
+        public final Builder useFunction(UseFunction useFunction) {
+            this.useFunction = useFunction;
             return this;
         }
     }

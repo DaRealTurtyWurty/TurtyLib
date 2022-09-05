@@ -42,17 +42,6 @@ public class TestBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
-        BlockHitResult result) {
-        if (level.isClientSide() && level.getBlockEntity(pos) instanceof final TestBlockEntity be) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
-                () -> () -> Minecraft.getInstance().setScreen(new TestScreen(be, TestBlockEntity.TITLE)));
-        }
-        
-        return InteractionResult.sidedSuccess(level.isClientSide());
-    }
-
-    @Override
     public @NotNull VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext ctx) {
         VoxelShape shape = Shapes.empty();
         shape = Shapes.join(shape, Shapes.box(0.1875, 2, 0.8125, 0.3125, 3, 1.1875), BooleanOp.OR);
@@ -71,5 +60,15 @@ public class TestBlock extends Block implements EntityBlock {
         shape = Shapes.join(shape, Shapes.box(-0.1875, 1.6875, 1.1875, 0.1875, 2, 2), BooleanOp.OR);
 
         return shape;
+    }
+
+    @Override
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (level.isClientSide() && level.getBlockEntity(pos) instanceof final TestBlockEntity be) {
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+                    () -> () -> Minecraft.getInstance().setScreen(new TestScreen(be, TestBlockEntity.TITLE)));
+        }
+
+        return InteractionResult.sidedSuccess(level.isClientSide());
     }
 }

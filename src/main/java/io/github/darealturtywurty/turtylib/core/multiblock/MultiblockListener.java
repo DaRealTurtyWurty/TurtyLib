@@ -5,6 +5,7 @@ import io.github.darealturtywurty.turtylib.common.blockentity.ModularBlockEntity
 import io.github.darealturtywurty.turtylib.common.blockentity.module.MultiblockModule;
 import io.github.darealturtywurty.turtylib.core.init.BlockEntityInit;
 import io.github.darealturtywurty.turtylib.core.init.BlockInit;
+import io.github.darealturtywurty.turtylib.core.network.PacketHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.player.Player;
@@ -37,7 +38,7 @@ public final class MultiblockListener {
                 continue;
             }
 
-            final BlockPattern.BlockPatternMatch match = testFind(
+            final BlockPattern.BlockPatternMatch match = find(
                     multiblock.getPatternMatcher(),
                     level,
                     position
@@ -52,7 +53,7 @@ public final class MultiblockListener {
 
             List<BlockPos> positions = new ArrayList<>();
 
-            // Cache the width, height, and depth of the multi-block's pattern, so it doesn't have to call it every cycle of the loop
+            // Cache the width, height, and depth
             final int multiBlockWidth = multiblock.getPatternMatcher().getWidth();
             final int multiBlockHeight = multiblock.getPatternMatcher().getDepth();
             final int multiBlockDepth = multiblock.getPatternMatcher().getHeight();
@@ -61,11 +62,14 @@ public final class MultiblockListener {
                     for (int z = 0; z < multiBlockDepth; z++) {
                         BlockInWorld inWorld = match.getBlock(x, z, y);
                         BlockPos pos = inWorld.getPos();
-                        level.setBlock(pos, BlockInit.MULTIBLOCK.get().defaultBlockState(), Block.UPDATE_ALL);
 
                         if (!pos.equals(controllerPosition)) {
+                            level.setBlock(pos, BlockInit.MULTIBLOCK.get().defaultBlockState(), Block.UPDATE_ALL);
                             level.getBlockEntity(pos, BlockEntityInit.MULTIBLOCK.get())
-                                    .ifPresent(blockEntity -> blockEntity.setController(controllerPosition));
+                                    .ifPresent(blockEntity -> {
+                                        blockEntity.setController(controllerPosition);
+                                        blockEntity.setPrevious(inWorld.getState());
+                                    });
                         }
 
                         positions.add(pos);
@@ -73,12 +77,15 @@ public final class MultiblockListener {
                 }
             }
 
+            BlockState currentControllerState = event.getLevel().getBlockState(controllerPosition);
             event.getLevel().setBlock(controllerPosition, controller.getValue(), Block.UPDATE_ALL);
             if (event.getLevel().getBlockEntity(controllerPosition) instanceof ModularBlockEntity modularBlockEntity) {
                 MultiblockModule multiblockModule = modularBlockEntity.getModule(MultiblockModule.class).orElseThrow(
                         () -> new IllegalStateException("Controller does not container a multiblock module!"));
 
+
                 multiblockModule.setPositions(positions);
+                multiblockModule.setPrevious(currentControllerState);
             }
 
             break;
@@ -87,8 +94,8 @@ public final class MultiblockListener {
     }
 
     // TODO: Make this more efficient
-    private static @Nullable BlockPattern.BlockPatternMatch testFind(BlockPattern pattern, LevelAccessor level, BlockPos pos) {
-        // Cache the width, height, and depth of the multi-block's pattern, so it doesn't have to call it every cycle of the loop
+    private static @Nullable BlockPattern.BlockPatternMatch find(BlockPattern pattern, LevelAccessor level, BlockPos pos) {
+        // Cache the width, height, and depth
         final int patternWidth = pattern.getWidth();
         final int patternDepth = pattern.getDepth();
         final int patternHeight = pattern.getHeight();

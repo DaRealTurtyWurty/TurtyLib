@@ -5,42 +5,49 @@ import io.github.darealturtywurty.turtylib.common.blockentity.module.MultiblockM
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.List;
 import java.util.function.Supplier;
 
-public class CSyncMultiblockPositionsPacket {
+public class CSyncMultiblockControllerPacket {
     private final BlockPos controller;
     private final List<BlockPos> positions;
+    private final BlockState previous;
 
-    public CSyncMultiblockPositionsPacket(FriendlyByteBuf friendlyByteBuf) {
-        this(friendlyByteBuf.readBlockPos(), friendlyByteBuf.readList(FriendlyByteBuf::readBlockPos));
+    public CSyncMultiblockControllerPacket(FriendlyByteBuf friendlyByteBuf) {
+        this(friendlyByteBuf.readBlockPos(), friendlyByteBuf.readList(FriendlyByteBuf::readBlockPos),
+                NbtUtils.readBlockState(friendlyByteBuf.readNbt()));
     }
 
-    public CSyncMultiblockPositionsPacket(BlockPos controller, List<BlockPos> positions) {
+    public CSyncMultiblockControllerPacket(BlockPos controller, List<BlockPos> positions, BlockState previous) {
         this.controller = controller;
         this.positions = positions;
+        this.previous = previous;
     }
 
     public void encode(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeBlockPos(this.controller);
         friendlyByteBuf.writeCollection(this.positions, FriendlyByteBuf::writeBlockPos);
+        friendlyByteBuf.writeNbt(NbtUtils.writeBlockState(this.previous));
     }
 
     public void handle(Supplier<NetworkEvent.Context> ctx) {
         ctx.get().setPacketHandled(true);
 
         ClientLevel level = Minecraft.getInstance().level;
-        if(level == null)
+        if (level == null)
             return;
 
-        if(level.getBlockEntity(this.controller) instanceof ModularBlockEntity modularBlockEntity) {
+        if (level.getBlockEntity(this.controller) instanceof ModularBlockEntity modularBlockEntity) {
             MultiblockModule multiblockModule = modularBlockEntity.getModule(MultiblockModule.class).orElseThrow(
                     () -> new IllegalStateException("Controller does not container a multiblock module!"));
 
             multiblockModule.setPositions(this.positions);
+            multiblockModule.setPrevious(this.previous);
         }
     }
 }

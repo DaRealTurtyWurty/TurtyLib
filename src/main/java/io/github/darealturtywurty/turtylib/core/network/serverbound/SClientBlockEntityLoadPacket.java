@@ -4,8 +4,8 @@ import io.github.darealturtywurty.turtylib.common.blockentity.ModularBlockEntity
 import io.github.darealturtywurty.turtylib.common.blockentity.MultiblockBlockEntity;
 import io.github.darealturtywurty.turtylib.common.blockentity.module.MultiblockModule;
 import io.github.darealturtywurty.turtylib.core.network.PacketHandler;
-import io.github.darealturtywurty.turtylib.core.network.clientbound.CSyncControllerPositionPacket;
-import io.github.darealturtywurty.turtylib.core.network.clientbound.CSyncMultiblockPositionsPacket;
+import io.github.darealturtywurty.turtylib.core.network.clientbound.CSyncMultiblockPacket;
+import io.github.darealturtywurty.turtylib.core.network.clientbound.CSyncMultiblockControllerPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
@@ -33,20 +33,23 @@ public class SClientBlockEntityLoadPacket {
         NetworkEvent.Context context = contextSupplier.get();
         context.setPacketHandled(true);
 
-        if(context.getSender() == null)
+        if (context.getSender() == null)
             return;
 
         ServerLevel level = context.getSender().getLevel();
 
-        if(level.getBlockEntity(this.position) instanceof ModularBlockEntity modularBlockEntity) {
-            if(!modularBlockEntity.hasModule(MultiblockModule.class))
+        if (level.getBlockEntity(this.position) instanceof ModularBlockEntity modularBlockEntity) {
+            if (!modularBlockEntity.hasModule(MultiblockModule.class))
                 return;
 
             MultiblockModule multiblockModule = modularBlockEntity.getModule(MultiblockModule.class).orElseThrow(
                     () -> new IllegalStateException("Controller does not container a multiblock module!"));
-            PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(), new CSyncMultiblockPositionsPacket(this.position, multiblockModule.getPositions()));
-        } else if(level.getBlockEntity(this.position) instanceof MultiblockBlockEntity multiblockBlockEntity) {
-            PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(), new CSyncControllerPositionPacket(this.position, multiblockBlockEntity.getController()));
+            PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(),
+                    new CSyncMultiblockControllerPacket(this.position, multiblockModule.getPositions(), multiblockModule.getPrevious()));
+        } else if (level.getBlockEntity(this.position) instanceof MultiblockBlockEntity multiblockBlockEntity) {
+            PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(),
+                    new CSyncMultiblockPacket(this.position, multiblockBlockEntity.getController(),
+                            multiblockBlockEntity.getPrevious()));
         }
     }
 }

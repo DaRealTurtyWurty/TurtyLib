@@ -4,27 +4,33 @@ import io.github.darealturtywurty.turtylib.common.blockentity.MultiblockBlockEnt
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class CSyncControllerPositionPacket {
+public class CSyncMultiblockPacket {
     private final BlockPos position;
     private final BlockPos controller;
+    private final BlockState previous;
 
-    public CSyncControllerPositionPacket(BlockPos position, BlockPos controller) {
+    public CSyncMultiblockPacket(BlockPos position, BlockPos controller, BlockState previous) {
         this.position = position;
         this.controller = controller;
+        this.previous = previous;
     }
 
-    public CSyncControllerPositionPacket(FriendlyByteBuf friendlyByteBuf) {
-        this(friendlyByteBuf.readBlockPos(), friendlyByteBuf.readBlockPos());
+    public CSyncMultiblockPacket(FriendlyByteBuf friendlyByteBuf) {
+        this(friendlyByteBuf.readBlockPos(), friendlyByteBuf.readBlockPos(),
+                NbtUtils.readBlockState(friendlyByteBuf.readNbt()));
     }
 
     public void encode(FriendlyByteBuf friendlyByteBuf) {
         friendlyByteBuf.writeBlockPos(this.position);
         friendlyByteBuf.writeBlockPos(this.controller);
+        friendlyByteBuf.writeNbt(NbtUtils.writeBlockState(this.previous));
     }
 
     public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
@@ -32,11 +38,12 @@ public class CSyncControllerPositionPacket {
         context.setPacketHandled(true);
 
         ClientLevel level = Minecraft.getInstance().level;
-        if(level == null)
+        if (level == null)
             return;
 
-        if(level.getBlockEntity(this.position) instanceof MultiblockBlockEntity multiblockBlockEntity) {
+        if (level.getBlockEntity(this.position) instanceof MultiblockBlockEntity multiblockBlockEntity) {
             multiblockBlockEntity.setController(this.controller);
+            multiblockBlockEntity.setPrevious(this.previous);
         }
     }
 }
