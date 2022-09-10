@@ -74,4 +74,26 @@ public class MultiblockBlock extends Block implements EntityBlock {
 
         return super.use(state, level, pos, player, hand, hitResult);
     }
+
+    @Override
+    public void onRemove(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState newState, boolean isMoving) {
+        super.onRemove(state, level, pos, newState, isMoving);
+
+        if(state.is(newState.getBlock()))
+            return;
+
+        MultiblockBlockEntity multiblockBlockEntity = level.getBlockEntity(pos, BlockEntityInit.MULTIBLOCK.get()).orElse(null);
+        if(multiblockBlockEntity == null)
+            return;
+
+        if(!multiblockBlockEntity.isForRemoval() && multiblockBlockEntity.getController() != null) {
+            BlockEntity controller = level.getBlockEntity(multiblockBlockEntity.getController());
+            if(controller instanceof ModularBlockEntity modularBlockEntity) {
+                MultiblockModule multiblock = modularBlockEntity.getModule(MultiblockModule.class).orElseThrow(
+                        () -> new IllegalStateException("Multiblock module not found"));
+                multiblockBlockEntity.setForRemoval(true);
+                multiblock.removeMultiblock(level, pos);
+            }
+        }
+    }
 }

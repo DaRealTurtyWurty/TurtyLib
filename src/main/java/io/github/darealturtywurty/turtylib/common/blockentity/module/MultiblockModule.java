@@ -40,12 +40,18 @@ public class MultiblockModule implements Module {
     public BlockState getPrevious() {
         return this.previous;
     }
+    public boolean isForRemoval() {
+        return this.forRemoval;
+    }
 
     public void setPositions(Collection<BlockPos> positions) {
         this.positions.addAll(positions);
     }
     public void setPrevious(BlockState previous) {
         this.previous = previous;
+    }
+    public void setForRemoval(boolean forRemoval) {
+        this.forRemoval = forRemoval;
     }
 
     @Override
@@ -64,7 +70,7 @@ public class MultiblockModule implements Module {
         compoundTag.put("Positions", compounds);
     }
 
-    // TODO: Fix NPE when leaving the game because setRemoved is called
+    // TODO: Find a way to call this method only when if it is replaced by a different block
     public void removeMultiblock(Level level, BlockPos excluded) {
         var positions = new ArrayList<>(this.positions);
         positions.remove(excluded);
@@ -83,15 +89,5 @@ public class MultiblockModule implements Module {
                 }
             });
         }
-    }
-
-    @Override
-    public void onRemoved(ModularBlockEntity blockEntity) {
-        if (this.forRemoval) {
-            return;
-        }
-
-        this.forRemoval = true;
-        removeMultiblock(blockEntity.getLevel(), blockEntity.getBlockPos());
     }
 }

@@ -1,6 +1,5 @@
 package io.github.darealturtywurty.turtylib.common.blockentity;
 
-import io.github.darealturtywurty.turtylib.common.blockentity.module.MultiblockModule;
 import io.github.darealturtywurty.turtylib.core.init.BlockEntityInit;
 import io.github.darealturtywurty.turtylib.core.network.PacketHandler;
 import io.github.darealturtywurty.turtylib.core.network.serverbound.SClientBlockEntityLoadPacket;
@@ -63,23 +62,6 @@ public class MultiblockBlockEntity extends BlockEntity {
 
         if (level.isClientSide()) {
             PacketHandler.CHANNEL.sendToServer(new SClientBlockEntityLoadPacket(this.getBlockPos()));
-        }
-    }
-
-    @Override
-    public void setRemoved() {
-        super.setRemoved();
-        if (level == null)
-            return;
-
-        if(!isForRemoval() && this.controller != null) {
-            BlockEntity controller = level.getBlockEntity(this.controller);
-            if(controller instanceof ModularBlockEntity modularBlockEntity) {
-                MultiblockModule multiblock = modularBlockEntity.getModule(MultiblockModule.class).orElseThrow(
-                        () -> new IllegalStateException("Multiblock module not found"));
-                setForRemoval(true);
-                multiblock.removeMultiblock(this.level, getBlockPos());
-            }
         }
     }
 }
