@@ -6,6 +6,9 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 
+import javax.annotation.Nullable;
+import java.util.Optional;
+
 public class EnergyModule implements CapabilityModule<EnergyStorage> {
 
 
@@ -15,25 +18,11 @@ public class EnergyModule implements CapabilityModule<EnergyStorage> {
     protected LazyOptional<IEnergyStorage> handler;
 
 
-    public EnergyModule(final int capacity, final boolean canTransfer, final boolean canReceive, final int maxReceive, final int maxExtract) {
-
-        if (canReceive && !canTransfer) {
-            if (maxReceive <= 0) {
-                throw new IllegalArgumentException("this energy storage must have a receive greater than 0");
-            }
-            energyStorage = new EnergyStorage(capacity, maxReceive, 0);
-        } else if (canTransfer && !canReceive) {
-            if (maxExtract <= 0) {
-                throw new IllegalArgumentException("this energy storage must have an extract greater than 0");
-            }
-            energyStorage = new EnergyStorage(capacity, maxExtract);
-        } else {
-            energyStorage = new EnergyStorage(capacity, maxReceive, maxExtract);
-        }
-
-
+    public EnergyModule(final int capacity, @Nullable Integer maxReceive, @Nullable Integer maxExtract) {
+        maxReceive = Optional.ofNullable(maxReceive).orElse(0);
+        maxExtract = Optional.ofNullable(maxExtract).orElse(0);
+        energyStorage = new EnergyStorage(capacity, maxReceive, maxExtract);
         this.handler = LazyOptional.of(() -> this.energyStorage);
-
     }
 
     @Override
