@@ -1,113 +1,93 @@
 package io.github.darealturtywurty.turtylib.common.blockentity.module;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
 import io.github.darealturtywurty.turtylib.common.blockentity.ModularBlockEntity;
-import io.github.darealturtywurty.turtylib.core.data.MultiblockData;
-import io.netty.util.internal.ThreadLocalRandom;
+import io.github.darealturtywurty.turtylib.common.blockentity.MultiblockBlockEntity;
+import io.github.darealturtywurty.turtylib.core.init.BlockEntityInit;
+import io.github.darealturtywurty.turtylib.core.multiblock.Multiblock;
+import io.github.darealturtywurty.turtylib.core.network.PacketHandler;
+import io.github.darealturtywurty.turtylib.core.network.serverbound.SClientBlockEntityLoadPacket;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Supplier;
+
 public class MultiblockModule implements Module {
-    private final Map<BlockPos, BlockState> posMap = new HashMap<>();
-    private BlockPos controller;
-    private final MultiblockData data;
-    private final Level level;
-    
-    public MultiblockModule(ModularBlockEntity controller, MultiblockData data) {
-        this.controller = controller.getBlockPos();
-        this.data = data;
-        this.level = controller.getLevel();
+    private final Supplier<Multiblock> multiblock;
+    private final List<BlockPos> positions = new ArrayList<>();
+    private BlockState previous;
+    private boolean forRemoval;
+
+    public MultiblockModule(Supplier<Multiblock> multiblockSupplier) {
+        this.multiblock = multiblockSupplier;
+    }
+
+    public Multiblock getMultiblock() {
+        return this.multiblock.get();
+    }
+    public List<BlockPos> getPositions() {
+        return positions;
+    }
+    public BlockState getPrevious() {
+        return this.previous;
+    }
+    public boolean isForRemoval() {
+        return this.forRemoval;
+    }
+
+    public void setPositions(Collection<BlockPos> positions) {
+        this.positions.addAll(positions);
+    }
+    public void setPrevious(BlockState previous) {
+        this.previous = previous;
+    }
+    public void setForRemoval(boolean forRemoval) {
+        this.forRemoval = forRemoval;
     }
 
     @Override
-    public void deserialize(ModularBlockEntity blockEntity, CompoundTag nbt) {
-        this.controller = NbtUtils.readBlockPos(nbt.getCompound("ControllerPos"));
-        this.posMap.clear();
-        nbt.getList("Positions", Tag.TAG_COMPOUND).stream().map(CompoundTag.class::cast).map(NbtUtils::readBlockPos)
-            .forEach(position -> this.posMap.put(position, this.level.getBlockState(position)));
+    public void deserialize(ModularBlockEntity modularBlockEntity, CompoundTag compoundTag) {
+        ListTag compounds = compoundTag.getList("Positions", Tag.TAG_COMPOUND);
+        for (Tag tag : compounds) {
+            var compound = (CompoundTag) tag;
+            this.positions.add(NbtUtils.readBlockPos(compound));
+        }
     }
 
     @Override
-    public void onLoad(ModularBlockEntity blockEntity) {
-        final Map<Vec3i, BlockState> offsets = new HashMap<>();
-        final var controller = new AtomicReference<Vec3i>();
-        
-        setupOffsets(this.data, offsets, controller);
-        
-        final Vec3i controllerPos = controller.get();
-        offsetOffsetsAndPlace(offsets, this.posMap, this.controller, this.level, controllerPos);
+    public void serialize(ModularBlockEntity modularBlockEntity, CompoundTag compoundTag) {
+        var compounds = new ListTag();
+        this.positions.stream().map(NbtUtils::writeBlockPos).forEach(compounds::add);
+        compoundTag.put("Positions", compounds);
     }
 
-    @Override
-    public void serialize(ModularBlockEntity blockEntity, CompoundTag nbt) {
-        final var positions = new ListTag();
-        this.posMap.keySet().forEach(pos -> positions.add(NbtUtils.writeBlockPos(pos)));
-        nbt.put("Positions", positions);
-        nbt.put("ControllerPos", NbtUtils.writeBlockPos(this.controller));
-    }
+    // TODO: Find a way to call this method only when if it is replaced by a different block
+    public void removeMultiblock(Level level, BlockPos excluded) {
+        var positions = new ArrayList<>(this.positions);
+        positions.remove(excluded);
 
-    private static void offsetOffsetsAndPlace(Map<Vec3i, BlockState> offsets, Map<BlockPos, BlockState> posMap,
-        BlockPos controllerPos, Level level, Vec3i controllerOffset) {
-        offsets.entrySet().parallelStream().forEachOrdered(entry -> {
-            final Vec3i pos = entry.getKey();
-            final BlockState state = entry.getValue();
-            
-            final Vec3i offset = Vec3i.ZERO;
-            if (pos.getX() < controllerOffset.getX()) {
-                offset.west(controllerOffset.getX() - pos.getX());
-            } else {
-                offset.east(controllerOffset.getX() - pos.getX());
-            }
-            
-            if (pos.getY() < controllerOffset.getY()) {
-                offset.below(controllerOffset.getY() - pos.getY());
-            } else {
-                offset.above(controllerOffset.getY() - pos.getY());
-            }
-            
-            if (pos.getZ() < controllerOffset.getZ()) {
-                offset.south(controllerOffset.getZ() - pos.getZ());
-            } else {
-                offset.north(controllerOffset.getZ() - pos.getZ());
-            }
-            
-            posMap.put(controllerPos.offset(offset), state);
-            level.setBlockAndUpdate(controllerPos.offset(offset), state);
-        });
-    }
-
-    private static void setupOffsets(MultiblockData data, Map<Vec3i, BlockState> offsets,
-        AtomicReference<Vec3i> controller) {
-        data.layers().forEach((yPos, keyList) -> {
-            int xPos = 0;
-            for (final String x : keyList) {
-                int zPos = 0;
-                for (final String z : x.split("")) {
-                    if (z.equalsIgnoreCase(data.controllerKey())) {
-                        controller.set(new Vec3i(xPos, yPos, zPos));
-                        zPos++;
-                        continue;
-                    }
-                    
-                    final List<BlockState> states = data.keys().get(z);
-                    offsets.put(new Vec3i(xPos, yPos, zPos),
-                        states.get(ThreadLocalRandom.current().nextInt(states.size() - 1)));
-
-                    zPos++;
+        for (BlockPos position : positions) {
+            level.getBlockEntity(position, BlockEntityInit.MULTIBLOCK.get()).ifPresentOrElse(blockEntity -> {
+                blockEntity.setForRemoval(true);
+                level.setBlock(position, blockEntity.getPrevious(), Block.UPDATE_ALL);
+            }, () -> {
+                BlockEntity blockEntity = level.getBlockEntity(position);
+                if(blockEntity instanceof ModularBlockEntity modularBlockEntity) {
+                    modularBlockEntity.getModule(MultiblockModule.class).ifPresent(multiblockModule -> {
+                        multiblockModule.forRemoval = true;
+                        level.setBlock(position, getPrevious(), Block.UPDATE_ALL);
+                    });
                 }
-
-                xPos++;
-            }
-        });
+            });
+        }
     }
 }

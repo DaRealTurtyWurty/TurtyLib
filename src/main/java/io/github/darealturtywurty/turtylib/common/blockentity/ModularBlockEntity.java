@@ -5,12 +5,15 @@ import java.util.Optional;
 import io.github.darealturtywurty.turtylib.common.blockentity.module.CapabilityModule;
 import io.github.darealturtywurty.turtylib.common.blockentity.module.Module;
 import io.github.darealturtywurty.turtylib.common.blockentity.module.ModuleList;
+import io.github.darealturtywurty.turtylib.core.network.PacketHandler;
+import io.github.darealturtywurty.turtylib.core.network.serverbound.SClientBlockEntityLoadPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import org.jetbrains.annotations.NotNull;
 
 public class ModularBlockEntity extends TickableBlockEntity {
     protected final ModuleList modules = new ModuleList();
@@ -19,19 +22,26 @@ public class ModularBlockEntity extends TickableBlockEntity {
         super(type, pos, state);
     }
 
-    public <T extends Module> T addModule(T module) {
+    protected <T extends Module> T addModule(T module) {
         this.modules.add(module);
         return module;
     }
 
     @SuppressWarnings("unchecked")
+    public <T extends Module> Optional<T> getModule(Class<T> moduleClass) {
+        return this.modules.stream().filter(moduleClass::isInstance).map(it -> (T)it).findFirst();
+    }
+
+    public <T extends Module> boolean hasModule(Class<T> moduleClass) {
+        return this.modules.stream().anyMatch(moduleClass::isInstance);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap) {
+    public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> cap) {
         final Optional<CapabilityModule> module = this.modules.stream().filter(CapabilityModule.class::isInstance)
                 .map(CapabilityModule.class::cast).filter(m -> m.getCapability() == cap).findFirst();
-        if (!module.isPresent())
-            return null;
-        return module.get().getLazy().cast();
+        return module.map(capabilityModule -> capabilityModule.getLazy().cast()).orElse(super.getCapability(cap));
     }
 
     @Override
@@ -41,7 +51,7 @@ public class ModularBlockEntity extends TickableBlockEntity {
     }
 
     @Override
-    public void load(CompoundTag nbt) {
+    public void load(@NotNull CompoundTag nbt) {
         super.load(nbt);
         this.modules.deserialize(this, nbt);
     }
@@ -50,6 +60,13 @@ public class ModularBlockEntity extends TickableBlockEntity {
     public void onLoad() {
         super.onLoad();
         this.modules.onLoad(this);
+
+        if(this.level == null)
+            return;
+
+        if(this.level.isClientSide()) {
+            PacketHandler.CHANNEL.sendToServer(new SClientBlockEntityLoadPacket(this.worldPosition));
+        }
     }
 
     @Override
