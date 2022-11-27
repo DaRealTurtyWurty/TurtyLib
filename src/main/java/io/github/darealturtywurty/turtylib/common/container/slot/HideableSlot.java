@@ -1,4 +1,4 @@
-package io.github.darealturtywurty.turtylib.common.container;
+package io.github.darealturtywurty.turtylib.common.container.slot;
 
 import java.util.function.Predicate;
 

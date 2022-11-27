@@ -1,33 +1,43 @@
 package io.github.darealturtywurty.turtylib.common.blockentity.module;
 
+import io.github.darealturtywurty.turtylib.common.blockentity.ImprovedEnergyStorage;
 import io.github.darealturtywurty.turtylib.common.blockentity.ModularBlockEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 
-import javax.annotation.Nullable;
-import java.util.Optional;
+public class EnergyModule implements CapabilityModule<IEnergyStorage> {
+    private static final String ENERGY_KEY = "Energy";
 
-public class EnergyModule implements CapabilityModule<EnergyStorage> {
+    protected int energy;
+    protected int capacity;
+    protected int maxReceive;
+    protected int maxExtract;
 
-
-    private static final String CURRENT_ENERGY_KEY = "current_energy";
-
-    private final EnergyStorage energyStorage;
+    private final ImprovedEnergyStorage storage;
     protected LazyOptional<IEnergyStorage> handler;
 
+    public EnergyModule(ModularBlockEntity be, Builder builder) {
+        this(be, builder.energy, builder.capacity, builder.maxReceive, builder.maxExtract);
+    }
 
-    public EnergyModule(final int capacity, @Nullable Integer maxReceive, @Nullable Integer maxExtract) {
-        maxReceive = Optional.ofNullable(maxReceive).orElse(0);
-        maxExtract = Optional.ofNullable(maxExtract).orElse(0);
-        energyStorage = new EnergyStorage(capacity, maxReceive, maxExtract);
-        this.handler = LazyOptional.of(() -> this.energyStorage);
+    public EnergyModule(ModularBlockEntity be, int energy, int capacity, int maxReceive, int maxExtract) {
+        this.energy = energy;
+        this.capacity = capacity;
+        this.maxReceive = maxReceive;
+        this.maxExtract = maxExtract;
+
+        this.storage = createStorage(be);
+        this.handler = LazyOptional.of(() -> this.storage);
+    }
+
+    public EnergyModule(ModularBlockEntity be) {
+        this(be, 0, 1000, 1000, 1000);
     }
 
     @Override
-    public EnergyStorage getCapability() {
-        return this.energyStorage;
+    public ImprovedEnergyStorage getCapability() {
+        return this.storage;
     }
 
     @Override
@@ -36,12 +46,43 @@ public class EnergyModule implements CapabilityModule<EnergyStorage> {
     }
 
     @Override
-    public void deserialize(final ModularBlockEntity blockEntity, final CompoundTag nbt) {
-        this.handler.ifPresent(iEnergyStorage -> iEnergyStorage.receiveEnergy(nbt.getInt(CURRENT_ENERGY_KEY), false));
+    public void deserialize(ModularBlockEntity blockEntity, CompoundTag nbt) {
+        this.storage.deserializeNBT(nbt.get(ENERGY_KEY));
     }
 
     @Override
-    public void serialize(final ModularBlockEntity blockEntity, final CompoundTag nbt) {
-        nbt.putInt(CURRENT_ENERGY_KEY, this.energyStorage.getEnergyStored());
+    public void serialize(ModularBlockEntity blockEntity, CompoundTag nbt) {
+        nbt.put(ENERGY_KEY, this.storage.serializeNBT());
+    }
+
+    protected ImprovedEnergyStorage createStorage(ModularBlockEntity be) {
+        return new ImprovedEnergyStorage(be, this.capacity, this.maxReceive, this.maxExtract, this.energy);
+    }
+
+    public static class Builder {
+        private int energy;
+        private int capacity;
+        private int maxReceive;
+        private int maxExtract;
+
+        public Builder energy(int energy) {
+            this.energy = energy;
+            return this;
+        }
+
+        public Builder capacity(int capacity) {
+            this.capacity = capacity;
+            return this;
+        }
+
+        public Builder maxReceive(int maxReceive) {
+            this.maxReceive = maxReceive;
+            return this;
+        }
+
+        public Builder maxExtract(int maxExtract) {
+            this.maxExtract = maxExtract;
+            return this;
+        }
     }
 }
