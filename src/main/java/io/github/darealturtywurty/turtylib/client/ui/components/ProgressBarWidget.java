@@ -1,39 +1,25 @@
 package io.github.darealturtywurty.turtylib.client.ui.components;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.IntSupplier;
-import java.util.function.Supplier;
 
-public class ProgressWidget extends AbstractWidget {
-    private final int frames;
-    private final ResourceLocation texture;
-    private final int textureX, textureY;
+public class ProgressBarWidget extends AbstractWidget {
     private final int fillX, fillY, fillWidth, fillHeight, fillColor;
     private final IntSupplier progressSupplier, maxProgressSupplier;
 
     private int progress, maxProgress;
-    private int frame;
 
-    public ProgressWidget(int pX, int pY, int pWidth, int pHeight, int frames, ResourceLocation texture, int textureX, int textureY, int fillX, int fillY, int fillWidth, int fillHeight, int fillColor, IntSupplier progressSupplier, IntSupplier maxProgressSupplier) {
+    public ProgressBarWidget(int pX, int pY, int pWidth, int pHeight, int fillX, int fillY, int fillWidth, int fillHeight, int fillColor, IntSupplier progressSupplier, IntSupplier maxProgressSupplier) {
         super(pX, pY, pWidth, pHeight, Component.empty());
-        this.frames = frames;
-        this.texture = texture;
-        this.textureX = textureX;
-        this.textureY = textureY;
-
         this.fillX = fillX;
         this.fillY = fillY;
         this.fillWidth = fillWidth;
         this.fillHeight = fillHeight;
         this.fillColor = fillColor;
-
         this.progressSupplier = progressSupplier;
         this.maxProgressSupplier = maxProgressSupplier;
     }
@@ -49,15 +35,6 @@ public class ProgressWidget extends AbstractWidget {
 
         this.progress = this.progressSupplier.getAsInt();
         this.maxProgress = this.maxProgressSupplier.getAsInt();
-
-        this.frame = (this.progress > 0) ? (this.frame + 1) % this.frames : 0;
-
-        // Render the background
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, this.texture);
-        blit(pPoseStack, this.x, this.y, this.textureX, this.textureY + (this.frame * this.width), this.width,
-                this.height);
 
         // Render progress bar
         int fillWidth = (int) ((float) this.progress / (float) this.maxProgress * this.fillWidth);
