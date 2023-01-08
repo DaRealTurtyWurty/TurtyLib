@@ -19,13 +19,16 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
+import org.jetbrains.annotations.NotNull;
 
 public class FluidWidget extends AbstractWidget {
     private final Minecraft minecraft;
 
-    private final int maximum;
-    private final Orientation orientation;
+    private int maximum;
+    private Orientation orientation;
+    private boolean drawBorder;
     private FluidInfo info;
+
 
     public FluidWidget(FluidStack fluid, int xPos, int yPos, int width, int height, int loopX, int loopY) {
         this(fluid, xPos, yPos, width, height, loopX, loopY, false);
@@ -33,7 +36,7 @@ public class FluidWidget extends AbstractWidget {
     
     public FluidWidget(FluidStack fluid, int xPos, int yPos, int width, int height, int loopX, int loopY,
         boolean flowing) {
-        this(fluid, Orientation.BOTTOM_TOP, xPos, yPos, width, height, loopX, loopY, 1, flowing);
+        this(fluid, Orientation.BOTTOM_TOP, xPos, yPos, width, height, loopX, loopY, 1000, flowing);
     }
     
     public FluidWidget(FluidStack fluid, Orientation orientation, int xPos, int yPos, int width, int height, int loopX,
@@ -76,34 +79,89 @@ public class FluidWidget extends AbstractWidget {
 
     @Override
     public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+        if(!isActive())
+            return;
+
+        int mX0 = 0, mY0 = 0, mX1 = 0, mY1 = 0;
+        int x0 = 0, y0 = 0, x1 = 0, y1 = 0;
+        switch (this.orientation) {
+            case LEFT_RIGHT -> {
+                x0 = this.x;
+                y0 = this.y;
+                x1 = this.x + this.info.scaledWidth;
+                y1 = this.y + this.height;
+                mX0 = this.x;
+                mY0 = this.y;
+                mX1 = this.x + this.width;
+                mY1 = this.y + this.height;
+            }
+            case TOP_BOTTOM -> {
+                x0 = this.x;
+                y0 = this.y;
+                x1 = this.x + this.width;
+                y1 = this.y + this.info.scaledHeight;
+                mX0 = this.x;
+                mY0 = this.y;
+                mX1 = this.x + this.width;
+                mY1 = this.y + this.height;
+            }
+            case RIGHT_LEFT -> {
+                x0 = this.x + this.width - this.info.scaledWidth;
+                y0 = this.y;
+                x1 = this.x + this.width;
+                y1 = this.y + this.height;
+                mX0 = this.x + this.width;
+                mY0 = this.y;
+                mX1 = this.x;
+                mY1 = this.y + this.height;
+            }
+            case BOTTOM_TOP -> {
+                x0 = this.x;
+                y0 = this.y + this.height - this.info.scaledHeight;
+                x1 = this.x + this.width;
+                y1 = this.y + this.height;
+                mX0 = this.x;
+                mY0 = this.y + this.height;
+                mX1 = this.x + this.width;
+                mY1 = this.y;
+            }
+        }
+
+        if(this.drawBorder) {
+            GuiUtils.drawOutline(stack, mX0, mY0, mX1, mY1, 0xFFFF0000, 1);
+        }
+
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
         RenderSystem.setShaderColor(this.info.color.x(), this.info.color.y(), this.info.color.z(), this.info.color.w());
         RenderSystem.enableBlend();
-        
-        if (this.orientation == Orientation.LEFT_RIGHT) {
-            GuiUtils.renderLoopSprite(this.info.texture, stack, this.x, this.y, this.x + this.info.scaledWidth,
-                this.y + this.height, this.info.loopX, this.info.loopY);
-        } else if (this.orientation == Orientation.TOP_BOTTOM) {
-            GuiUtils.renderLoopSprite(this.info.texture, stack, this.x, this.y, this.x + this.width,
-                this.y + this.info.scaledHeight, this.info.loopX, this.info.loopY);
-        } else if (this.orientation == Orientation.BOTTOM_TOP) {
-            GuiUtils.renderLoopSprite(this.info.texture, stack, this.x, this.y + this.height - this.info.scaledHeight,
-                this.x + this.width, this.y + this.height, this.info.loopX, this.info.loopY);
-        } else if (this.orientation == Orientation.RIGHT_LEFT) {
-            GuiUtils.renderLoopSprite(this.info.texture, stack, this.x + this.width - this.info.scaledWidth, this.y,
-                this.x + this.width, this.y + this.height, this.info.loopX, this.info.loopY);
-        }
-        
+        GuiUtils.renderLoopSprite(this.info.getTexture(), stack, x0, y0, x1, y1, this.info.loopX, this.info.loopY);
         RenderSystem.disableBlend();
-        
-        drawTooltip(stack, mouseX, mouseY, partialTicks);
+
+        // TODO: Render this from the gui not here
+        if(this.info.tooltip != null && !this.info.tooltip.isEmpty()) {
+            drawTooltip(stack, mouseX, mouseY, partialTicks);
+        }
     }
 
     public void setFlowing(boolean flowing) {
         this.info.flowing = flowing;
         this.info.texture = ClientUtils.getBlock(
             this.info.flowing ? this.info.renderProps.getFlowingTexture() : this.info.renderProps.getStillTexture());
+    }
+
+    public void setMaximum(int max) {
+        if(max > 0) {
+            this.maximum = max;
+        }
+    }
+
+    public void setOrientation(@NotNull Orientation orientation) {
+        this.orientation = orientation;
+    }
+
+    public void setShouldDrawBorder(boolean drawBorder) {
+        this.drawBorder = drawBorder;
     }
     
     public void setFluid(FluidStack fluid) {

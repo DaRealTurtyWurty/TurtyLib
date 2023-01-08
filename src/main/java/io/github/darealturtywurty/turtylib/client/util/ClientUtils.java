@@ -17,7 +17,8 @@ public final class ClientUtils {
     private ClientUtils() {
         throw new IllegalStateException("Attempted to construct utility class!");
     }
-    
+
+    // TODO: Move to math utils
     public static Vector4f ARGBtoRGBA(int argb) {
         return new Vector4f((argb >> 16 & 0xFF) / 255f, (argb >> 8 & 0xFF) / 255f, (argb & 0xFF) / 255f,
             (argb >> 24 & 0xFF) / 255f);
