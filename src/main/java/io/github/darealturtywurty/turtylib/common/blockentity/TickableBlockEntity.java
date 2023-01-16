@@ -2,6 +2,7 @@ package io.github.darealturtywurty.turtylib.common.blockentity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,9 +18,9 @@ public class TickableBlockEntity extends BlockEntity {
 
     public void update() {
         requestModelDataUpdate();
-        this.setChanged();
+        setChanged();
         if (this.level != null) {
-            this.level.setBlockAndUpdate(this.worldPosition, getBlockState());
+            this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
         }
     }
 }
