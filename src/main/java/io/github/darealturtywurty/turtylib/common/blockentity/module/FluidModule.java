@@ -4,17 +4,21 @@ import java.util.function.Predicate;
 
 import io.github.darealturtywurty.turtylib.common.blockentity.ModularBlockEntity;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidTank;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 
-public class FluidModule implements CapabilityModule<IFluidTank> {
+public class FluidModule implements CapabilityModule<IFluidHandler> {
     protected final int capacity;
     protected Predicate<FluidStack> validator;
     
     private final FluidTank tank;
-    protected LazyOptional<IFluidTank> handler;
+    protected LazyOptional<IFluidHandler> handler;
     
     public FluidModule(ModularBlockEntity be, int capacity) {
         this(be, capacity, stack -> true);
@@ -34,8 +38,13 @@ public class FluidModule implements CapabilityModule<IFluidTank> {
     }
 
     @Override
-    public IFluidTank getCapability() {
+    public IFluidHandler getCapabilityInstance() {
         return this.tank;
+    }
+
+    @Override
+    public Capability<IFluidHandler> getCapability() {
+        return ForgeCapabilities.FLUID_HANDLER;
     }
 
     @Override

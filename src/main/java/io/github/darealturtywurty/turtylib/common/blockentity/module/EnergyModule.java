@@ -3,6 +3,8 @@ package io.github.darealturtywurty.turtylib.common.blockentity.module;
 import io.github.darealturtywurty.turtylib.common.blockentity.ImprovedEnergyStorage;
 import io.github.darealturtywurty.turtylib.common.blockentity.ModularBlockEntity;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.IEnergyStorage;
 
@@ -36,8 +38,13 @@ public class EnergyModule implements CapabilityModule<IEnergyStorage> {
     }
 
     @Override
-    public ImprovedEnergyStorage getCapability() {
+    public ImprovedEnergyStorage getCapabilityInstance() {
         return this.storage;
+    }
+
+    @Override
+    public Capability<IEnergyStorage> getCapability() {
+        return ForgeCapabilities.ENERGY;
     }
 
     @Override
