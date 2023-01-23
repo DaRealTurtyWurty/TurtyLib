@@ -1,9 +1,5 @@
 package io.github.darealturtywurty.turtylib.common.blockentity;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
-
 import io.github.darealturtywurty.turtylib.common.blockentity.module.CapabilityModule;
 import io.github.darealturtywurty.turtylib.common.blockentity.module.Module;
 import io.github.darealturtywurty.turtylib.common.blockentity.module.ModuleList;
@@ -23,6 +19,11 @@ import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
 public class ModularBlockEntity extends TickableBlockEntity {
     protected final ModuleList modules = new ModuleList();
 
@@ -37,7 +38,7 @@ public class ModularBlockEntity extends TickableBlockEntity {
 
     @SuppressWarnings("unchecked")
     public <T extends Module> Optional<T> getModule(Class<T> moduleClass) {
-        return this.modules.stream().filter(moduleClass::isInstance).map(it -> (T)it).findFirst();
+        return this.modules.stream().filter(moduleClass::isInstance).map(it -> (T) it).findFirst();
     }
 
     public <T extends Module> boolean hasModule(Class<T> moduleClass) {
@@ -77,10 +78,9 @@ public class ModularBlockEntity extends TickableBlockEntity {
         super.onLoad();
         this.modules.onLoad(this);
 
-        if(this.level == null)
-            return;
+        if (this.level == null) return;
 
-        if(this.level.isClientSide()) {
+        if (this.level.isClientSide()) {
             PacketHandler.CHANNEL.sendToServer(new SClientBlockEntityLoadPacket(this.worldPosition));
         }
     }
@@ -104,11 +104,13 @@ public class ModularBlockEntity extends TickableBlockEntity {
     }
 
     protected List<Consumer<CompoundTag>> getWriteSyncData() {
-        return List.of();
+        return this.modules.stream().map(module -> (Consumer<CompoundTag>) (tag) -> module.serialize(this, tag))
+                .collect(Collectors.toList());
     }
 
     protected List<Consumer<CompoundTag>> getReadSyncData() {
-        return List.of();
+        return this.modules.stream().map(module -> (Consumer<CompoundTag>) (tag) -> module.deserialize(this, tag))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -121,15 +123,14 @@ public class ModularBlockEntity extends TickableBlockEntity {
     @Nullable
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
-        if(getWriteSyncData().isEmpty())
-            return super.getUpdatePacket();
+        if (getWriteSyncData().isEmpty()) return super.getUpdatePacket();
 
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        if(getReadSyncData().isEmpty()) {
+        if (getReadSyncData().isEmpty()) {
             return;
         }
 
@@ -139,8 +140,7 @@ public class ModularBlockEntity extends TickableBlockEntity {
 
     @Override
     public void handleUpdateTag(CompoundTag tag) {
-        if(getReadSyncData().isEmpty())
-            return;
+        if (getReadSyncData().isEmpty()) return;
 
         getReadSyncData().forEach(reader -> reader.accept(tag));
     }

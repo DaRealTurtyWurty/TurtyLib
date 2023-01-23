@@ -1,6 +1,7 @@
 package io.github.darealturtywurty.turtylib.common.blockentity.module;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import io.github.darealturtywurty.turtylib.common.blockentity.ModularBlockEntity;
 import net.minecraft.nbt.CompoundTag;
@@ -14,7 +15,27 @@ public class ModuleList extends ArrayList<Module> {
             return false;
         return super.add(module);
     }
-    
+
+    @Override
+    public void add(int index, Module element) {
+        throw new UnsupportedOperationException("Cannot add a module directly to a ModuleList!");
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends Module> c) {
+        throw new UnsupportedOperationException("Cannot add a module directly to a ModuleList!");
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<? extends Module> c) {
+        throw new UnsupportedOperationException("Cannot add a module directly to a ModuleList!");
+    }
+
+    @Override
+    public Module set(int index, Module element) {
+        throw new UnsupportedOperationException("Cannot set a module directly in a ModuleList!");
+    }
+
     public boolean alreadyContains(Module module) {
         return stream().anyMatch(m -> m.getClass().isInstance(module));
     }
