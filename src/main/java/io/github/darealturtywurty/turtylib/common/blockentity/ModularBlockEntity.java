@@ -47,8 +47,16 @@ public class ModularBlockEntity extends TickableBlockEntity {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side) {
-        final Optional<CapabilityModule> module = this.modules.stream().filter(CapabilityModule.class::isInstance)
-                .map(CapabilityModule.class::cast).filter(m -> m.getCapability() == cap).findFirst();
+        Optional<CapabilityModule> module = Optional.empty();
+        for (Module m : this.modules) {
+            if (m instanceof CapabilityModule<?> capModule) {
+                if (capModule.getCapability() == cap) {
+                    module = Optional.of(capModule);
+                    break;
+                }
+            }
+        }
+
         return module.map(capabilityModule -> capabilityModule.getLazy().cast()).orElse(super.getCapability(cap, side));
     }
 
