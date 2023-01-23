@@ -10,6 +10,7 @@ import io.github.darealturtywurty.turtylib.common.blockentity.module.ModuleList;
 import io.github.darealturtywurty.turtylib.core.network.PacketHandler;
 import io.github.darealturtywurty.turtylib.core.network.serverbound.SClientBlockEntityLoadPacket;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
@@ -45,10 +46,10 @@ public class ModularBlockEntity extends TickableBlockEntity {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> cap) {
+    public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side) {
         final Optional<CapabilityModule> module = this.modules.stream().filter(CapabilityModule.class::isInstance)
                 .map(CapabilityModule.class::cast).filter(m -> m.getCapability() == cap).findFirst();
-        return module.map(capabilityModule -> capabilityModule.getLazy().cast()).orElse(super.getCapability(cap));
+        return module.map(capabilityModule -> capabilityModule.getLazy().cast()).orElse(super.getCapability(cap, side));
     }
 
     @Override
