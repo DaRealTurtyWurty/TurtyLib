@@ -84,11 +84,11 @@ public class EnergyWidget extends AbstractWidget {
     public static class Builder {
         private final int x, y, width, height;
 
-        private boolean tooltip = false;
+        private boolean tooltip = true;
         private Either<EnergyStorage, Pair<IntSupplier, IntSupplier>> energyStorage = Either.right(
                 Pair.of(() -> 0, () -> 0));
-        private Either3<ResourceLocation, Int2IntFunction, Gradient> textureOrColorOrGradient = Either3.middle(
-                i -> 0xFFFF0000);
+        private Either3<ResourceLocation, Int2IntFunction, Gradient> textureOrColorOrGradient = Either3.right(
+                Gradient.of(0xFFFF0000, 0xFF660000));
 
         public Builder(int x, int y, int width, int height) {
             this.x = x;

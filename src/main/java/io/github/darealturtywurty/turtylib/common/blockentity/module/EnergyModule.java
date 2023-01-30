@@ -34,7 +34,7 @@ public class EnergyModule implements CapabilityModule<IEnergyStorage> {
     }
 
     public EnergyModule(ModularBlockEntity be) {
-        this(be, 0, 1000, 1000, 1000);
+        this(be, 0, 10000, 10000, 10000);
     }
 
     @Override

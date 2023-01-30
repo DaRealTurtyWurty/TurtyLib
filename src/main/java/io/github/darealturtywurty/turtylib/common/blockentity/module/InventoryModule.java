@@ -14,7 +14,7 @@ import net.minecraftforge.items.ItemStackHandler;
 public class InventoryModule implements CapabilityModule<IItemHandler> {
     protected final int size;
 
-    private final IItemHandlerModifiable inventory;
+    protected final IItemHandlerModifiable inventory;
     protected LazyOptional<IItemHandler> handler;
 
     public InventoryModule(ModularBlockEntity be, int size) {
@@ -25,13 +25,13 @@ public class InventoryModule implements CapabilityModule<IItemHandler> {
 
     @Override
     public void deserialize(ModularBlockEntity blockEntity, CompoundTag nbt) {
-        final ListTag list = nbt.getList("Items", 10);
-        for (int x = 0; x < list.size(); ++x) {
-            final CompoundTag compound = list.getCompound(x);
-            final int r = compound.getByte("Slot") & 255;
-            final int invslots = this.inventory.getSlots();
-            if (r >= 0 && r < invslots) {
-                this.inventory.setStackInSlot(r, ItemStack.of(compound));
+        final ListTag items = nbt.getList("Items", 10);
+        for (int itemIndex = 0; itemIndex < items.size(); ++itemIndex) {
+            final CompoundTag compound = items.getCompound(itemIndex);
+            final int slotIndex = compound.getByte("Slot") & 255;
+            final int invSlots = this.inventory.getSlots();
+            if (slotIndex < invSlots) {
+                this.inventory.setStackInSlot(slotIndex, ItemStack.of(compound));
             }
         }
     }
@@ -53,17 +53,17 @@ public class InventoryModule implements CapabilityModule<IItemHandler> {
 
     @Override
     public void serialize(ModularBlockEntity blockEntity, CompoundTag nbt) {
-        final var list = new ListTag();
+        final var items = new ListTag();
         final int slots = this.inventory.getSlots();
-        for (int x = 0; x < slots; ++x) {
-            final ItemStack stack = this.inventory.getStackInSlot(x);
-            final var compound = new CompoundTag();
-            compound.putByte("Slot", (byte) x);
-            stack.save(compound);
-            list.add(compound);
+        for (int slotIndex = 0; slotIndex < slots; ++slotIndex) {
+            final ItemStack stack = this.inventory.getStackInSlot(slotIndex);
+            final var item = new CompoundTag();
+            item.putByte("Slot", (byte) slotIndex);
+            stack.save(item);
+            items.add(item);
         }
 
-        nbt.put("Items", list);
+        nbt.put("Items", items);
     }
 
     protected IItemHandlerModifiable createInventory(ModularBlockEntity be) {
