@@ -58,7 +58,8 @@ public class ModularBlockEntity extends TickableBlockEntity {
             }
         }
 
-        return module.map(capabilityModule -> capabilityModule.getLazy().cast()).orElse(super.getCapability(cap, side));
+        return module.map(capabilityModule -> capabilityModule.getLazy(side).cast())
+                .orElse(super.getCapability(cap, side));
     }
 
     @Override
