@@ -7,7 +7,7 @@ import java.util.List;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import io.github.darealturtywurty.turtylib.client.util.GuiUtils;
-import io.github.darealturtywurty.turtylib.client.util.MathUtils;
+import io.github.darealturtywurty.turtylib.core.util.MathUtils;
 
 public class GroupedTab extends Tab {
     public static final int WHITESPACE = 2;

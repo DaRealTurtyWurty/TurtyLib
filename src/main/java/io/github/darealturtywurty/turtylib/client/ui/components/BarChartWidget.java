@@ -14,7 +14,7 @@ import com.mojang.math.Vector3f;
 import io.github.darealturtywurty.turtylib.client.ui.components.LineGraphWidget.Axis;
 import io.github.darealturtywurty.turtylib.client.util.FourVec2;
 import io.github.darealturtywurty.turtylib.client.util.GuiUtils;
-import io.github.darealturtywurty.turtylib.client.util.MathUtils;
+import io.github.darealturtywurty.turtylib.core.util.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;

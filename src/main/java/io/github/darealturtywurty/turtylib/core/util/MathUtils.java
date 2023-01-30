@@ -1,8 +1,10 @@
-package io.github.darealturtywurty.turtylib.client.util;
+package io.github.darealturtywurty.turtylib.core.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.darealturtywurty.turtylib.client.util.FourVec2;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec2;
 
 public final class MathUtils {
@@ -66,5 +68,9 @@ public final class MathUtils {
         final float differenceX = secondPointX - firstPointX;
         final float differenceY = secondPointY - firstPointY;
         return Mth.sqrt((differenceX * differenceX) + (differenceY * differenceY));
+    }
+
+    public static float nextFloat(RandomSource pRandom, float pMin, float pMax) {
+        return pMin + pRandom.nextFloat() * (pMax - pMin);
     }
 }

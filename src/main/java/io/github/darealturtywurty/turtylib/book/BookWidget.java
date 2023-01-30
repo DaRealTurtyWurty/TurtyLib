@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import io.github.darealturtywurty.turtylib.client.util.MathUtils;
+import io.github.darealturtywurty.turtylib.core.util.MathUtils;
 import net.minecraft.network.chat.Component;
 
 public abstract class BookWidget {
