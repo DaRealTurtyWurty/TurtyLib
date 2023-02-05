@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import io.github.darealturtywurty.turtylib.client.util.Gradient;
+import io.github.darealturtywurty.turtylib.client.util.GuiUtils;
 import io.github.darealturtywurty.turtylib.core.util.Either3;
 import it.unimi.dsi.fastutil.ints.Int2IntFunction;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -20,7 +21,7 @@ import java.util.function.IntSupplier;
 public class EnergyWidget extends AbstractWidget {
     private final Screen screen;
 
-    private final boolean tooltip;
+    private final boolean tooltip, drawBorder;
     private final EnergyStorage energyStorage;
     private final IntSupplier energySupplier, maxEnergySupplier;
 
@@ -28,11 +29,12 @@ public class EnergyWidget extends AbstractWidget {
     private final Int2IntFunction color;
     private final Gradient gradient;
 
-    private EnergyWidget(Screen screen, int x, int y, int width, int height, boolean tooltip, Either3<ResourceLocation, Int2IntFunction, Gradient> textureOrColorOrGradient, Either<EnergyStorage, Pair<IntSupplier, IntSupplier>> energyStorage) {
+    private EnergyWidget(Screen screen, int x, int y, int width, int height, boolean tooltip, boolean drawBorder, Either3<ResourceLocation, Int2IntFunction, Gradient> textureOrColorOrGradient, Either<EnergyStorage, Pair<IntSupplier, IntSupplier>> energyStorage) {
         super(x, y, width, height, Component.empty());
         this.screen = screen;
 
         this.tooltip = tooltip;
+        this.drawBorder = drawBorder;
         this.texture = textureOrColorOrGradient.map(texture -> texture, color -> null, gradient -> null);
         this.color = textureOrColorOrGradient.map(texture -> null, color -> color, gradient -> null);
         this.gradient = textureOrColorOrGradient.map(texture -> null, color -> null, gradient -> gradient);
@@ -48,6 +50,10 @@ public class EnergyWidget extends AbstractWidget {
 
     @Override
     public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+        if (this.drawBorder) {
+            GuiUtils.drawOutline(pPoseStack, this.x, this.y, this.x + this.width, this.y + this.height, 0xFF000000, 1);
+        }
+
         int energy = this.energyStorage != null ? this.energyStorage.getEnergyStored() : this.energySupplier.getAsInt();
         int maxEnergy = this.energyStorage != null ? this.energyStorage.getMaxEnergyStored() : this.maxEnergySupplier.getAsInt();
         int energyHeight = (int) ((float) energy / maxEnergy * this.height);
@@ -85,6 +91,8 @@ public class EnergyWidget extends AbstractWidget {
         private final int x, y, width, height;
 
         private boolean tooltip = true;
+        private boolean drawBorder = true;
+
         private Either<EnergyStorage, Pair<IntSupplier, IntSupplier>> energyStorage = Either.right(
                 Pair.of(() -> 0, () -> 0));
         private Either3<ResourceLocation, Int2IntFunction, Gradient> textureOrColorOrGradient = Either3.right(
@@ -95,6 +103,16 @@ public class EnergyWidget extends AbstractWidget {
             this.y = y;
             this.width = width;
             this.height = height;
+        }
+
+        public Builder tooltip(boolean tooltip) {
+            this.tooltip = tooltip;
+            return this;
+        }
+
+        public Builder drawBorder(boolean drawBorder) {
+            this.drawBorder = drawBorder;
+            return this;
         }
 
         public Builder energyStorage(EnergyStorage energyStorage) {
@@ -122,13 +140,8 @@ public class EnergyWidget extends AbstractWidget {
             return this;
         }
 
-        public Builder tooltip() {
-            this.tooltip = true;
-            return this;
-        }
-
         public EnergyWidget build(Screen screen) {
-            return new EnergyWidget(screen, this.x, this.y, this.width, this.height, this.tooltip,
+            return new EnergyWidget(screen, this.x, this.y, this.width, this.height, this.tooltip, this.drawBorder,
                     this.textureOrColorOrGradient, this.energyStorage);
         }
     }
