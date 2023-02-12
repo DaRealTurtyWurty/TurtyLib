@@ -1,5 +1,6 @@
 package io.github.darealturtywurty.turtylib.client.util;
 
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
@@ -121,12 +122,21 @@ public final class GuiUtils {
         stack.mulPose(quaternion);
         stack.translate(offset.x(), offset.y(), offset.z());
         stack.mulPose(new Quaternion((float) -rotation.x(), (float) -rotation.y(), (float) -rotation.z(), true));
+
+        Lighting.setupForEntityInInventory();
+
         final EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
-        final MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(
-                Tesselator.getInstance().getBuilder());
-        render(renderManager, entity, 0.0D, 0.0D, 0.0D, 0.0F, partialTicks, stack, buffer, 15728880);
+        renderManager.setRenderShadow(false);
+        final MultiBufferSource.BufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
+        RenderSystem.runAsFancy(() -> {
+            render(renderManager, entity, 0.0D, 0.0D, 0.0D, 0.0F, partialTicks, stack, buffer, 15728880);
+        });
+        renderManager.setRenderShadow(true);
         buffer.endBatch();
+
         stack.popPose();
+
+        Lighting.setupFor3DItems();
     }
 
     public static void renderLoopSprite(TextureAtlasSprite sprite, PoseStack stack, int x0, int y0, int x1, int y1, int loopX, int loopY) {
