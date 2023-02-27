@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
@@ -35,7 +36,8 @@ public final class GuiUtils {
         ClientUtils.getFont().draw(stack, text, xPos - textWidth / 2f, yPos, colour);
     }
 
-    public static void drawDebugOutline(PoseStack stack, int xPos, int yPos, int width, int height, int thickness, int argbColor) {
+    public static void drawDebugOutline(PoseStack stack, int xPos, int yPos, int width, int height, int thickness,
+                                        int argbColor) {
         final FourVec2 top = MathUtils.getFourVec(stack, xPos, yPos, xPos + width, yPos, thickness);
         final FourVec2 bottom = MathUtils.getFourVec(stack, xPos, yPos + height, xPos + width, yPos + height,
                 thickness);
@@ -48,7 +50,8 @@ public final class GuiUtils {
         GuiUtils.drawLine(stack, right.first(), right.second(), right.third(), right.fourth(), argbColor);
     }
 
-    public static void drawLine(double startX, double startY, double endX, double endY, int red, int green, int blue, int alpha, float lineWidth) {
+    public static void drawLine(double startX, double startY, double endX, double endY, int red, int green, int blue,
+                                int alpha, float lineWidth) {
         RenderSystem.assertOnRenderThread();
         RenderSystem.disableTexture();
         RenderSystem.depthMask(false);
@@ -91,7 +94,8 @@ public final class GuiUtils {
         BufferUploader.drawWithShader(buffer.end());
     }
 
-    public static void drawQuadSplitTexture(PoseStack stack, int x, int y, int width, int height, int imageWidth, int imageHeight) {
+    public static void drawQuadSplitTexture(PoseStack stack, int x, int y, int width, int height, int imageWidth,
+                                            int imageHeight) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, Resources.TAB_BACKGROUND);
         GuiComponent.blit(stack, x, y, 0, 0, width / 2, height / 2, imageWidth, imageHeight);
@@ -112,7 +116,8 @@ public final class GuiUtils {
         }
     }
 
-    public static void renderEntity(PoseStack stack, Entity entity, Vec3 rotation, Vec3 scale, Vec3 offset, int xPos, int yPos, float partialTicks) {
+    public static void renderEntity(PoseStack stack, Entity entity, Vec3 rotation, Vec3 scale, Vec3 offset, int xPos,
+                                    int yPos, float partialTicks) {
         stack.pushPose();
         stack.translate(xPos, yPos, 1050.0F);
         stack.scale(1.0F, 1.0F, -1.0F);
@@ -139,7 +144,8 @@ public final class GuiUtils {
         Lighting.setupFor3DItems();
     }
 
-    public static void renderLoopSprite(TextureAtlasSprite sprite, PoseStack stack, int x0, int y0, int x1, int y1, int loopX, int loopY) {
+    public static void renderLoopSprite(TextureAtlasSprite sprite, PoseStack stack, int x0, int y0, int x1, int y1,
+                                        int loopX, int loopY) {
         final int width = x1 - x0, height = y1 - y0;
         final int leftoverX = width % loopX, leftoverY = height % loopY;
 
@@ -177,7 +183,8 @@ public final class GuiUtils {
         renderSprite(sprite, stack, x0, y0, x1, y1, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
     }
 
-    public static void renderSprite(TextureAtlasSprite sprite, PoseStack stack, int x0, int y0, int x1, int y1, float u0, float v0, float u1, float v1) {
+    public static void renderSprite(TextureAtlasSprite sprite, PoseStack stack, int x0, int y0, int x1, int y1,
+                                    float u0, float v0, float u1, float v1) {
         final BufferBuilder buffer = Tesselator.getInstance().getBuilder();
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         buffer.vertex(stack.last().pose(), x0, y1, 0).uv(u0, v1).endVertex();
@@ -187,7 +194,9 @@ public final class GuiUtils {
         BufferUploader.drawWithShader(buffer.end());
     }
 
-    private static <E extends Entity> void render(EntityRenderDispatcher renderManager, E entity, double xPos, double yPos, double zPos, float rotation, float delta, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+    private static <E extends Entity> void render(EntityRenderDispatcher renderManager, E entity, double xPos,
+                                                  double yPos, double zPos, float rotation, float delta,
+                                                  PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         final EntityRenderer<? super E> entityRenderer = renderManager.getRenderer(entity);
 
         try {
@@ -230,5 +239,25 @@ public final class GuiUtils {
 //        drawLine(x1, y1, x1, y0, a, r, g, b, width);
 //        drawLine(x1, y0, x0, y0, a, r, g, b, width);
 //        drawLine(x0, y0, x0, y1, a, r, g, b, width);
+    }
+
+    public static void drawQuadSplitSprite(PoseStack poseStack, ResourceLocation texture, int x, int y, int width,
+                                           int height, int u0, int v0, int u1, int v1) {
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, texture);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+
+        // Top left
+        GuiComponent.blit(poseStack, x, y, u0, v0, width / 2, height / 2, u1, v1);
+
+        // Top right
+        GuiComponent.blit(poseStack, x + width / 2, y, u1 - width / 2f, v0, width / 2, height / 2, u1, v1);
+
+        // Bottom left
+        GuiComponent.blit(poseStack, x, y + height / 2, u0, v1 - height / 2f, width / 2, height / 2, u1, v1);
+
+        // Bottom right
+        GuiComponent.blit(poseStack, x + width / 2, y + height / 2, u1 - width / 2f, v1 - height / 2f, width / 2,
+                height / 2, u1, v1);
     }
 }
