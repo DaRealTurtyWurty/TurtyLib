@@ -248,16 +248,15 @@ public final class GuiUtils {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
         // Top left
-        GuiComponent.blit(poseStack, x, y, u0, v0, width / 2, height / 2, u1, v1);
+        GuiComponent.blit(poseStack, x, y, u0, v0, width / 2, height / 2, 256, 256);
 
-        // Top right
-        GuiComponent.blit(poseStack, x + width / 2, y, u1 - width / 2f, v0, width / 2, height / 2, u1, v1);
+        // Top Right
+        GuiComponent.blit(poseStack, x + width / 2, y, u1 - width / 2f, v0, width / 2, height / 2, 256, 256);
 
-        // Bottom left
-        GuiComponent.blit(poseStack, x, y + height / 2, u0, v1 - height / 2f, width / 2, height / 2, u1, v1);
+        // Bottom Left
+        GuiComponent.blit(poseStack, x, y + height / 2, u0, v1 - height / 2f, width / 2, height / 2, 256, 256);
 
-        // Bottom right
-        GuiComponent.blit(poseStack, x + width / 2, y + height / 2, u1 - width / 2f, v1 - height / 2f, width / 2,
-                height / 2, u1, v1);
+        // Bottom Right
+        GuiComponent.blit(poseStack, x + width / 2, y + height / 2, u1 - width / 2f, v1 - height / 2f, width / 2, height / 2, 256, 256);
     }
 }
