@@ -11,6 +11,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraftforge.fluids.FluidStack;
 
 @SuppressWarnings("resource")
 public final class ClientUtils {
@@ -62,5 +65,13 @@ public final class ClientUtils {
 
     public static ResourceManager getResourceManager() {
         return getMinecraft().getResourceManager();
+    }
+
+    public static IClientFluidTypeExtensions getClientFluidExtensions(FluidStack fluid) {
+        return getClientFluidExtensions(fluid.getFluid());
+    }
+
+    public static IClientFluidTypeExtensions getClientFluidExtensions(Fluid fluid) {
+        return IClientFluidTypeExtensions.of(fluid);
     }
 }
