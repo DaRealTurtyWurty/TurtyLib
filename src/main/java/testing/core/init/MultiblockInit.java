@@ -1,8 +1,8 @@
 package testing.core.init;
 
-import io.github.darealturtywurty.turtylib.TurtyLib;
-import io.github.darealturtywurty.turtylib.core.init.AbstractInit;
-import io.github.darealturtywurty.turtylib.core.multiblock.Multiblock;
+import dev.turtywurty.turtylib.TurtyLib;
+import dev.turtywurty.turtylib.core.init.AbstractInit;
+import dev.turtywurty.turtylib.core.multiblock.Multiblock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.block.Blocks;

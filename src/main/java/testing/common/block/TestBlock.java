@@ -23,7 +23,7 @@ import net.minecraftforge.fml.DistExecutor;
 import org.jetbrains.annotations.NotNull;
 import testing.client.screen.TestScreen;
 import testing.common.blockentity.TestBlockEntity;
-import io.github.darealturtywurty.turtylib.common.blockentity.TickableBlockEntity;
+import dev.turtywurty.turtylib.common.blockentity.TickableBlockEntity;
 
 public class TestBlock extends Block implements EntityBlock {
     public TestBlock(Properties properties) {

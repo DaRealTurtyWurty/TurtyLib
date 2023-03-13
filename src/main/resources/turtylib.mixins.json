@@ -2,7 +2,7 @@
     "minVersion": "0.8",
     "compatibilityLevel": "JAVA_17",
     "required": true,
-    "package": "io.github.darealturtywurty.turtylib.mixins",
+    "package": "dev.turtywurty.turtylib.mixins",
     "mixins": [
         "BlockMixin"
     ],

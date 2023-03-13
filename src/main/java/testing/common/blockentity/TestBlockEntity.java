@@ -1,10 +1,10 @@
 package testing.common.blockentity;
 
-import io.github.darealturtywurty.turtylib.common.blockentity.ModularBlockEntity;
-import io.github.darealturtywurty.turtylib.common.blockentity.module.EnergyModule;
-import io.github.darealturtywurty.turtylib.common.blockentity.module.FluidModule;
-import io.github.darealturtywurty.turtylib.common.blockentity.module.InventoryModule;
-import io.github.darealturtywurty.turtylib.common.blockentity.module.MultiblockModule;
+import dev.turtywurty.turtylib.common.blockentity.ModularBlockEntity;
+import dev.turtywurty.turtylib.common.blockentity.module.EnergyModule;
+import dev.turtywurty.turtylib.common.blockentity.module.FluidModule;
+import dev.turtywurty.turtylib.common.blockentity.module.InventoryModule;
+import dev.turtywurty.turtylib.common.blockentity.module.MultiblockModule;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.BlockState;

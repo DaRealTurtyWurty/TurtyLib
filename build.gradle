@@ -26,7 +26,7 @@ artifacts {
 }
 
 version = '1.0'
-group = 'dev.turtywurty.turtylib'
+group = 'dev.turtywurty'
 archivesBaseName = 'turtylib'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
