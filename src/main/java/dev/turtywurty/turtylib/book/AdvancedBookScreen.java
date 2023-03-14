@@ -2,6 +2,7 @@ package dev.turtywurty.turtylib.book;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.mojang.blaze3d.platform.PngInfo;
@@ -9,6 +10,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.turtywurty.turtylib.client.util.ClientUtils;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
@@ -51,7 +53,7 @@ public class AdvancedBookScreen extends Screen {
     }
     
     public void renderContents(Page page, PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        for (final BookWidget widget : page.widgets) {
+        for (final AbstractWidget widget : page.widgets) {
             widget.render(stack, mouseX, mouseY, partialTicks);
         }
     }
@@ -117,5 +119,10 @@ public class AdvancedBookScreen extends Screen {
             throw new IllegalStateException("There was an issue getting the information for resource: "
                 + leftPageTexture + " or " + binderTexture + " or " + rightPageTexture, exception);
         }
+    }
+
+    public void setPages(Page... pages) {
+        this.pages.clear();
+        Collections.addAll(this.pages, pages);
     }
 }

@@ -7,6 +7,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import testing.client.Renderer;
 import testing.core.init.BlockEntityInit;
 import testing.core.init.BlockInit;
+import testing.core.init.ItemInit;
 import testing.core.init.MultiblockInit;
 
 @Mod(TestMod.MODID)
@@ -19,6 +20,7 @@ public class TestMod {
         BlockInit.BLOCKS.register(bus);
         BlockEntityInit.BLOCK_ENTITIES.register(bus);
         MultiblockInit.MULTIBLOCKS.register(bus);
+        ItemInit.ITEMS.register(bus);
 
         bus.addListener(this::registerRenderers);
     }

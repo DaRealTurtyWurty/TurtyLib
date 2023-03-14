@@ -5,12 +5,13 @@ import java.util.Collections;
 import java.util.List;
 
 import dev.turtywurty.turtylib.client.util.Resources;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 public class Page {
     public final Component title;
-    public final List<BookWidget> widgets = new ArrayList<>();
+    public final List<AbstractWidget> widgets = new ArrayList<>();
     public ResourceLocation texture = Resources.BLANK_BOOK_PAGE;
     public ResourceLocation binderTexture = Resources.BOOK_BINDER;
 
@@ -26,7 +27,7 @@ public class Page {
         this(translatable ? Component.translatable(title) : Component.literal(title));
     }
     
-    public Page addWidgets(BookWidget... widgets) {
+    public Page addWidgets(AbstractWidget... widgets) {
         Collections.addAll(this.widgets, widgets);
         return this;
     }
