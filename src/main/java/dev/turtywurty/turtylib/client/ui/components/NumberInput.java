@@ -29,12 +29,12 @@ public class NumberInput extends EditBox {
     public NumberInput(int xPos, int yPos, int width, int height, int didgetCount, int min, int max, int defaultVal,
             Component name) {
         super(ClientUtils.getFont(), xPos, yPos, width, height, name);
-        min = min < max ? min : max;
-        max = max > min ? max : min;
+        min = Math.min(min, max);
         if (min == max) {
             min = max - 1;
         }
-        defaultVal = defaultVal >= max ? max : defaultVal <= min ? min : defaultVal;
+
+        defaultVal = defaultVal >= max ? max : Math.max(defaultVal, min);
         
         setCanLoseFocus(true);
         setMaxLength(didgetCount);

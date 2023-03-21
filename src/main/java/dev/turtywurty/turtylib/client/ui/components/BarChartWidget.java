@@ -46,6 +46,11 @@ public class BarChartWidget extends AbstractWidget {
 
     @Override
     public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+        if(!this.visible)
+            return;
+
+        this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, this.x, this.y, this.width, this.height);
+
         drawAxis(stack);
         drawBars(stack);
         

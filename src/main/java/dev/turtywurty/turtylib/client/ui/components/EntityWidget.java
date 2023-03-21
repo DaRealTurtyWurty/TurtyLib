@@ -3,6 +3,7 @@ package dev.turtywurty.turtylib.client.ui.components;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.turtywurty.turtylib.client.util.GuiUtils;
+import dev.turtywurty.turtylib.core.util.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -30,6 +31,11 @@ public class EntityWidget extends AbstractWidget {
     
     @Override
     public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+        if(!this.visible)
+            return;
+
+        this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, this.x, this.y, this.width, this.height);
+
         if (this.rotationSpeed != 0) {
             this.rotation += partialTicks * this.rotationSpeed;
         }

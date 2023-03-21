@@ -7,6 +7,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.turtywurty.turtylib.client.util.Gradient;
 import dev.turtywurty.turtylib.client.util.GuiUtils;
 import dev.turtywurty.turtylib.core.util.Either3;
+import dev.turtywurty.turtylib.core.util.MathUtils;
 import it.unimi.dsi.fastutil.ints.Int2IntFunction;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -50,6 +51,10 @@ public class EnergyWidget extends AbstractWidget {
 
     @Override
     public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+        if (!this.visible) return;
+
+        this.isHovered = MathUtils.isWithinArea(pMouseX, pMouseY, this.x, this.y, this.width, this.height);
+
         if (this.drawBorder) {
             GuiUtils.drawOutline(pPoseStack, this.x, this.y, this.x + this.width, this.y + this.height, 0xFF000000, 1);
         }
@@ -71,15 +76,11 @@ public class EnergyWidget extends AbstractWidget {
             fill(pPoseStack, this.x, this.y + this.height - energyHeight, this.x + this.width, this.y + this.height,
                     this.color.applyAsInt(energy));
         }
-
-        if (this.tooltip) {
-            renderToolTip(pPoseStack, pMouseX, pMouseY);
-        }
     }
 
     @Override
     public void renderToolTip(PoseStack pPoseStack, int pMouseX, int pMouseY) {
-        if (!isMouseOver(pMouseX, pMouseY)) return;
+        if (this.visible && this.isHovered && this.tooltip) return;
 
         int energy = this.energyStorage != null ? this.energyStorage.getEnergyStored() : this.energySupplier.getAsInt();
         int maxEnergy = this.energyStorage != null ? this.energyStorage.getMaxEnergyStored() : this.maxEnergySupplier.getAsInt();

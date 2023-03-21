@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.turtywurty.turtylib.client.util.Resources;
+import dev.turtywurty.turtylib.core.util.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -72,25 +73,27 @@ public class ToggleButton extends AbstractWidget {
     
     @Override
     public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        if (this.visible) {
-            if (this.label != Component.empty()) {
-                this.font.draw(stack, this.label, this.baseXPos, this.y + this.height / 4, 0x404040);
-                this.x = this.baseXPos + this.font.width(this.label);
-            }
-            
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderTexture(0, this.textureLocation);
-            RenderSystem.disableDepthTest();
-            int xPos = this.xTexStart;
-            int yPos = this.yTexStart;
-            if (this.isStateTriggered) {
-                xPos += this.xDiffTex;
-                yPos += this.yDiffTex;
-            }
-            
-            blit(stack, this.x, this.y, xPos, yPos, this.width, this.height, 32, 32);
-            RenderSystem.enableDepthTest();
+        if (!this.visible) return;
+
+        this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, this.x, this.y, this.width, this.height);
+
+        if (!this.label.getString().isBlank()) {
+            this.font.draw(stack, this.label, this.baseXPos, this.y + this.height / 4f, 0x404040);
+            this.x = this.baseXPos + this.font.width(this.label);
         }
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, this.textureLocation);
+        RenderSystem.disableDepthTest();
+        int xPos = this.xTexStart;
+        int yPos = this.yTexStart;
+        if (this.isStateTriggered) {
+            xPos += this.xDiffTex;
+            yPos += this.yDiffTex;
+        }
+
+        blit(stack, this.x, this.y, xPos, yPos, this.width, this.height, 32, 32);
+        RenderSystem.enableDepthTest();
     }
     
     public void setActive(boolean active) {

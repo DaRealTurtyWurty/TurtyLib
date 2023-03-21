@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.turtywurty.turtylib.client.util.Resources;
+import dev.turtywurty.turtylib.core.util.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -44,16 +45,15 @@ public class InformationWidget extends AbstractWidget {
 
     @Override
     public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        this.isHovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width
-            && mouseY < this.y + this.height;
+        if(this.visible) return;
 
-        if (this.visible) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderTexture(0, Resources.INFORMATION);
-            RenderSystem.disableDepthTest();
-            blit(stack, this.x, this.y, 0, 0, this.width, this.height, 16, 16);
-            RenderSystem.enableDepthTest();
-        }
+        this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, this.x, this.y, this.width, this.height);
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, Resources.INFORMATION);
+        RenderSystem.disableDepthTest();
+        blit(stack, this.x, this.y, 0, 0, this.width, this.height, 16, 16);
+        RenderSystem.enableDepthTest();
     }
 
     @Override

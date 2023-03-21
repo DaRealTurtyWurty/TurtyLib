@@ -59,7 +59,7 @@ public class FluidWidget extends AbstractWidget {
         setFluid(fluid);
     }
     
-    public void drawTooltip(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void drawTooltip(PoseStack stack, int mouseX, int mouseY) {
         final boolean withinHorizontal = this.orientation == Orientation.LEFT_RIGHT
             && MathUtils.isWithinArea(mouseX, mouseY, this.x, this.y, this.info.scaledWidth, this.height)
             || this.orientation == Orientation.RIGHT_LEFT && MathUtils.isWithinArea(mouseX, mouseY,
@@ -79,7 +79,7 @@ public class FluidWidget extends AbstractWidget {
 
     @Override
     public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        if(!isActive())
+        if(!this.visible)
             return;
 
         int mX0 = 0, mY0 = 0, mX1 = 0, mY1 = 0;
@@ -127,6 +127,8 @@ public class FluidWidget extends AbstractWidget {
             }
         }
 
+        this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, x0, y0, x1 - x0, y1 - y0);
+
         if(this.drawBorder) {
             GuiUtils.drawOutline(stack, mX0, mY0, mX1, mY1, 0xFFFF0000, 1);
         }
@@ -137,11 +139,6 @@ public class FluidWidget extends AbstractWidget {
         RenderSystem.enableBlend();
         GuiUtils.renderLoopSprite(this.info.getTexture(), stack, x0, y0, x1, y1, this.info.loopX, this.info.loopY);
         RenderSystem.disableBlend();
-
-        // TODO: Render this from the gui not here
-        if(this.info.tooltip != null && !this.info.tooltip.isEmpty()) {
-            drawTooltip(stack, mouseX, mouseY, partialTicks);
-        }
     }
 
     public void setFlowing(boolean flowing) {
@@ -184,6 +181,15 @@ public class FluidWidget extends AbstractWidget {
 
     protected List<Component> getTooltip() {
         return this.info.tooltip;
+    }
+
+    @Override
+    public void renderToolTip(PoseStack pPoseStack, int pMouseX, int pMouseY) {
+        if(this.visible && this.isHovered) {
+            if(this.info.tooltip != null && !this.info.tooltip.isEmpty()) {
+                drawTooltip(pPoseStack, pMouseX, pMouseY);
+            }
+        }
     }
 
     public static class FluidInfo {

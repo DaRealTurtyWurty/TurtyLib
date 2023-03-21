@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.turtywurty.turtylib.client.util.ImageInfo;
+import dev.turtywurty.turtylib.core.util.MathUtils;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
@@ -34,31 +35,33 @@ public class AnimatableTexture extends AbstractWidget {
 
     @Override
     public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        if (this.visible) {
-            final double currentMillis = System.currentTimeMillis();
-            final double timeOfLastFrame = currentMillis - this.lastMillis;
-            this.lastMillis = currentMillis;
-            this.countTimeForFrames += timeOfLastFrame / 1000f;
+        if (!this.visible) return;
 
-            final int frametime = this.frameLengths.get(this.currentFrame) == null ? this.defaultFrameTime
-                : this.frameLengths.get(this.currentFrame);
-            if (this.countTimeForFrames >= 1f / frametime) {
-                this.countTimeForFrames = 0;
+        this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, this.x, this.y, this.width, this.height);
 
-                if (++this.currentFrame >= this.frameCount) {
-                    this.currentFrame = 0;
-                }
+        final double currentMillis = System.currentTimeMillis();
+        final double timeOfLastFrame = currentMillis - this.lastMillis;
+        this.lastMillis = currentMillis;
+        this.countTimeForFrames += timeOfLastFrame / 1000f;
+
+        final int frametime = this.frameLengths.get(this.currentFrame) == null ? this.defaultFrameTime
+            : this.frameLengths.get(this.currentFrame);
+        if (this.countTimeForFrames >= 1f / frametime) {
+            this.countTimeForFrames = 0;
+
+            if (++this.currentFrame >= this.frameCount) {
+                this.currentFrame = 0;
             }
-
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderTexture(0, this.textureLocation);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.enableDepthTest();
-            blit(stack, this.x, this.y, 0, this.width * this.currentFrame, this.width, this.height, this.imageWidth,
-                this.imageHeight);
         }
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, this.textureLocation);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.enableDepthTest();
+        blit(stack, this.x, this.y, 0, this.width * this.currentFrame, this.width, this.height, this.imageWidth,
+            this.imageHeight);
     }
     
     public void setActive(boolean active) {

@@ -1,14 +1,9 @@
 package dev.turtywurty.turtylib.client.ui.components;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
-
 import dev.turtywurty.turtylib.client.util.ClientUtils;
+import dev.turtywurty.turtylib.core.util.MathUtils;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.RenderType;
@@ -33,21 +28,23 @@ public class WorldPreviewWidget extends AbstractWidget {
 
     @Override
     public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        if (this.visible) {
-            final Matrix4f matrix = stack.last().pose();
-            final BufferBuilder buffer = Tesselator.getInstance().getBuilder();
-            buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
-            buffer.vertex(matrix, 0.0F, this.imageHeight, 0F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(15728880)
+        if (!this.visible) return;
+
+        this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, this.x, this.y, this.width, this.height);
+
+        final Matrix4f matrix = stack.last().pose();
+        final BufferBuilder buffer = Tesselator.getInstance().getBuilder();
+        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
+        buffer.vertex(matrix, 0.0F, this.imageHeight, 0F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(15728880)
                 .endVertex();
-            buffer.vertex(matrix, this.imageWidth, this.imageHeight, 0F).color(255, 255, 255, 255).uv(1.0F, 1.0F)
+        buffer.vertex(matrix, this.imageWidth, this.imageHeight, 0F).color(255, 255, 255, 255).uv(1.0F, 1.0F)
                 .uv2(15728880).endVertex();
-            buffer.vertex(matrix, this.imageWidth, 0.0F, 0F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(15728880)
+        buffer.vertex(matrix, this.imageWidth, 0.0F, 0F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(15728880)
                 .endVertex();
-            buffer.vertex(matrix, 0.0F, 0.0F, 0F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(15728880).endVertex();
-            BufferUploader.drawWithShader(buffer.end());
-        }
+        buffer.vertex(matrix, 0.0F, 0.0F, 0F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(15728880).endVertex();
+        BufferUploader.drawWithShader(buffer.end());
     }
-    
+
     public void setPixels(int x, int y, int rgba) {
         this.texture.getPixels().setPixelRGBA(x, y, rgba);
     }
