@@ -145,37 +145,30 @@ public final class GuiUtils {
     }
 
     public static void renderLoopSprite(TextureAtlasSprite sprite, PoseStack stack, int x0, int y0, int x1, int y1, int loopX, int loopY) {
-        final int width = x1 - x0, height = y1 - y0;
-        final int leftoverX = width % loopX, leftoverY = height % loopY;
+        int width = x1 - x0, height = y1 - y0;
+        int leftoverX = width % loopX, leftoverY = height % loopY;
 
-        for (int x = 0; x < Math.floor(width / (float) loopX); x++) {
-            for (int y = 0; y < Math.floor(height / (float) loopY); y++) {
-                renderSprite(sprite, stack, x0 + x * loopX, y0 + y * loopY, x0 + x * loopX + loopX,
-                        y0 + y * loopY + loopY);
+        for (int x = 0; x < width - leftoverX; x += loopX) {
+            for (int y = 0; y < height - leftoverY; y += loopY) {
+                renderSprite(sprite, stack, x0 + x, y0 + y, x0 + x + loopX, y0 + y + loopY);
             }
         }
 
-        final float relWidth = sprite.getU1() - sprite.getU0();
-        final float resultX = leftoverX / (float) loopX * relWidth + sprite.getU0();
-        final float relHeight = sprite.getV1() - sprite.getV0();
-        final float resultY = leftoverY / (float) loopY * relHeight + sprite.getV0();
-
         if (leftoverX > 0) {
-            for (int x = 0; x < Math.floor(width / (float) loopX); x++) {
-                renderSprite(sprite, stack, x0 + x * loopX, y1 - leftoverY, x0 + x * loopX + loopX, y1, sprite.getU0(),
-                        sprite.getV0(), sprite.getU1(), resultY);
+            for (int y = 0; y < height - leftoverY; y += loopY) {
+                renderSprite(sprite, stack, x1 - leftoverX, y0 + y, x1, y0 + y + loopY);
             }
         }
 
         if (leftoverY > 0) {
-            for (int y = 0; y < Math.floor(height / (float) loopY); y++) {
-                renderSprite(sprite, stack, x1 - leftoverX, y0 + y * loopY, x1, y0 + y * loopY + loopY, sprite.getU0(),
-                        sprite.getV0(), resultX, sprite.getV1());
+            for (int x = 0; x < width - leftoverX; x += loopX) {
+                renderSprite(sprite, stack, x0 + x, y1 - leftoverY, x0 + x + loopX, y1);
             }
         }
 
-        renderSprite(sprite, stack, x0 + width - leftoverX, y0 + height - leftoverY, x1, y1, sprite.getU0(),
-                sprite.getV0(), resultX, resultY);
+        if (leftoverX > 0 && leftoverY > 0) {
+            renderSprite(sprite, stack, x1 - leftoverX, y1 - leftoverY, x1, y1);
+        }
     }
 
     public static void renderSprite(TextureAtlasSprite sprite, PoseStack stack, int x0, int y0, int x1, int y1) {
