@@ -27,6 +27,7 @@ public class FluidWidget extends AbstractWidget {
     private int maximum;
     private Orientation orientation;
     private boolean drawBorder;
+    private int borderColour = 0xFF000000;
     private FluidInfo info;
 
 
@@ -129,16 +130,16 @@ public class FluidWidget extends AbstractWidget {
 
         this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, x0, y0, x1 - x0, y1 - y0);
 
-        if(this.drawBorder) {
-            GuiUtils.drawOutline(stack, mX0, mY0, mX1, mY1, 0xFFFF0000, 1);
-        }
-
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
         RenderSystem.setShaderColor(this.info.color.x(), this.info.color.y(), this.info.color.z(), this.info.color.w());
         RenderSystem.enableBlend();
         GuiUtils.renderLoopSprite(this.info.getTexture(), stack, x0, y0, x1, y1, this.info.loopX, this.info.loopY);
         RenderSystem.disableBlend();
+
+        if(this.drawBorder) {
+            GuiUtils.drawOutline(stack, mX0, mY0, mX1, mY1, this.borderColour, 1);
+        }
     }
 
     public void setFlowing(boolean flowing) {
@@ -159,6 +160,10 @@ public class FluidWidget extends AbstractWidget {
 
     public void setShouldDrawBorder(boolean drawBorder) {
         this.drawBorder = drawBorder;
+    }
+
+    public void setBorderColour(int colour) {
+        this.borderColour = colour;
     }
     
     public void setFluid(FluidStack fluid) {

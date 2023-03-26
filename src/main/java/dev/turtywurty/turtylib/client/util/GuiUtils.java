@@ -41,11 +41,12 @@ public final class GuiUtils {
     }
 
     public static void drawDebugOutline(PoseStack stack, int xPos, int yPos, int width, int height, int thickness, int argbColor) {
-        final FourVec2 top = MathUtils.getFourVec(stack, xPos, yPos, xPos + width, yPos, thickness);
-        final FourVec2 bottom = MathUtils.getFourVec(stack, xPos, yPos + height, xPos + width, yPos + height,
-                thickness);
-        final FourVec2 left = MathUtils.getFourVec(stack, xPos, yPos, xPos, yPos + height, thickness);
-        final FourVec2 right = MathUtils.getFourVec(stack, xPos + width, yPos, xPos + width, yPos + height, thickness);
+        final FourVec2 top = MathUtils.getFourVec(stack, xPos - thickness / 2f, yPos, xPos + width + thickness / 2f,
+                yPos, thickness);
+        final FourVec2 bottom = MathUtils.getFourVec(stack, xPos - thickness / 2f, yPos + height,
+                xPos + width + thickness / 2f, yPos + height, thickness);
+        final FourVec2 left = MathUtils.getFourVec(stack, xPos, yPos + thickness / 2f, xPos, yPos + height - thickness / 2f, thickness);
+        final FourVec2 right = MathUtils.getFourVec(stack, xPos + width, yPos + thickness / 2f, xPos + width, yPos + height - thickness / 2f, thickness);
 
         GuiUtils.drawLine(stack, top.first(), top.second(), top.third(), top.fourth(), argbColor);
         GuiUtils.drawLine(stack, bottom.first(), bottom.second(), bottom.third(), bottom.fourth(), argbColor);
