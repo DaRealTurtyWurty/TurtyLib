@@ -41,7 +41,7 @@ public final class MultiblockListener {
             long startTime = System.currentTimeMillis();
             BlockPattern.BlockPatternMatch match = find(multiblock.getPatternMatcher(), level, position);
             long endTime = System.currentTimeMillis();
-            TurtyLib.LOGGER.info("Took {}ms to find a match", endTime - startTime);
+            TurtyLib.LOGGER.info("Took {}ms to {} find a match", endTime - startTime, match == null ? "not" : "");
 
             if (match == null) continue;
 
