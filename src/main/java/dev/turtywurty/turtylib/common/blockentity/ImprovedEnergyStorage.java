@@ -47,4 +47,36 @@ public class ImprovedEnergyStorage extends EnergyStorage {
         }
         return energyExtracted;
     }
+
+    /**
+     * This method is used to internally receive energy, and avoids the super method's max receive check.
+     * @param maxReceive The maximum amount of energy to receive.
+     * @param simulate If true, the charge will only be simulated.
+     * @return The amount of energy that was (or would have been, if simulated) received.
+     */
+    public int receiveEnergyInternal(int maxReceive, boolean simulate) {
+        int energyReceived = Math.min(this.capacity - this.energy, maxReceive);
+        if (!simulate) {
+            this.energy += energyReceived;
+            this.blockEntity.update();
+        }
+
+        return energyReceived;
+    }
+
+    /**
+     * This method is used to internally extract energy, and avoids the super method's max extract check.
+     * @param maxExtract The maximum amount of energy to extract.
+     * @param simulate If true, the discharge will only be simulated.
+     * @return The amount of energy that was (or would have been, if simulated) extracted.
+     */
+    public int extractEnergyInternal(int maxExtract, boolean simulate) {
+        int energyExtracted = Math.min(this.energy, maxExtract);
+        if (!simulate) {
+            this.energy -= energyExtracted;
+            this.blockEntity.update();
+        }
+
+        return energyExtracted;
+    }
 }
