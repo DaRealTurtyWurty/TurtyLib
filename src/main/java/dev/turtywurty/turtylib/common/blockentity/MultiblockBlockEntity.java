@@ -4,6 +4,8 @@ import dev.turtywurty.turtylib.core.init.BlockEntityInit;
 import dev.turtywurty.turtylib.core.network.PacketHandler;
 import dev.turtywurty.turtylib.core.network.serverbound.SClientBlockEntityLoadPacket;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -43,7 +45,7 @@ public class MultiblockBlockEntity extends BlockEntity {
     public void load(@NotNull CompoundTag tag) {
         super.load(tag);
         this.controller = NbtUtils.readBlockPos(tag.getCompound("controller"));
-        this.previous = NbtUtils.readBlockState(tag.getCompound("previous"));
+        this.previous = NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), tag.getCompound("previous"));
     }
 
     @Override

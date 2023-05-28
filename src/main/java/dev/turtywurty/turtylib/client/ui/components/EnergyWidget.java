@@ -45,40 +45,40 @@ public class EnergyWidget extends AbstractWidget {
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
+    public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {
         defaultButtonNarrationText(pNarrationElementOutput);
     }
 
     @Override
-    public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    public void renderWidget(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
         if (!this.visible) return;
 
-        this.isHovered = MathUtils.isWithinArea(pMouseX, pMouseY, this.x, this.y, this.width, this.height);
+        this.isHovered = MathUtils.isWithinArea(pMouseX, pMouseY, getX(), getY(), getWidth(), getHeight());
 
         if (this.drawBorder) {
-            GuiUtils.drawOutline(pPoseStack, this.x, this.y, this.x + this.width, this.y + this.height, 0xFF000000, 1);
+            GuiUtils.drawOutline(pPoseStack, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0xFF000000, 1);
         }
 
         int energy = this.energyStorage != null ? this.energyStorage.getEnergyStored() : this.energySupplier.getAsInt();
         int maxEnergy = this.energyStorage != null ? this.energyStorage.getMaxEnergyStored() : this.maxEnergySupplier.getAsInt();
-        int energyHeight = (int) ((float) energy / maxEnergy * this.height);
+        int energyHeight = (int) ((float) energy / maxEnergy * getHeight());
 
         if (texture != null) {
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, this.texture);
 
-            blit(pPoseStack, this.x, this.y + this.height - energyHeight, 0, 0, this.width, energyHeight);
+            blit(pPoseStack, getX(), getY() + getHeight() - energyHeight, 0, 0, getWidth(), energyHeight);
         } else if (gradient != null) {
-            this.gradient.draw(pPoseStack, this.x, this.y + this.height - energyHeight, this.x + this.width,
-                    this.y + this.height);
+            this.gradient.draw(pPoseStack, getX(), getY() + getHeight() - energyHeight, getX() + getWidth(),
+                    getY() + getHeight());
         } else {
-            fill(pPoseStack, this.x, this.y + this.height - energyHeight, this.x + this.width, this.y + this.height,
+            fill(pPoseStack, getX(), getY() + getHeight() - energyHeight, getX() + getWidth(), getY() + getHeight(),
                     this.color.applyAsInt(energy));
         }
     }
 
-    @Override
+    @Deprecated(since = "1.19.3")
     public void renderToolTip(PoseStack pPoseStack, int pMouseX, int pMouseY) {
         if (this.visible && this.isHovered && this.tooltip) return;
 

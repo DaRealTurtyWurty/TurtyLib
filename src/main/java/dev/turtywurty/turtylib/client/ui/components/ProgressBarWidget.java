@@ -24,15 +24,15 @@ public class ProgressBarWidget extends AbstractWidget {
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
+    public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {
         defaultButtonNarrationText(pNarrationElementOutput);
     }
 
     @Override
-    public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    public void renderWidget(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
         if (!this.visible) return;
 
-        this.isHovered = MathUtils.isWithinArea(pMouseX, pMouseY, this.x, this.y, this.width, this.height);
+        this.isHovered = MathUtils.isWithinArea(pMouseX, pMouseY, getX(), getY(), getWidth(), getHeight());
 
         int progress = this.progressSupplier.getAsInt();
         int maxProgress = this.maxProgressSupplier.getAsInt();

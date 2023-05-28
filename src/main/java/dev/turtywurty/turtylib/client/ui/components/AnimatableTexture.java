@@ -34,19 +34,19 @@ public class AnimatableTexture extends AbstractWidget {
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void renderWidget(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         if (!this.visible) return;
 
-        this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, this.x, this.y, this.width, this.height);
+        this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, getX(), getY(), getWidth(), getHeight());
 
         final double currentMillis = System.currentTimeMillis();
         final double timeOfLastFrame = currentMillis - this.lastMillis;
         this.lastMillis = currentMillis;
         this.countTimeForFrames += timeOfLastFrame / 1000f;
 
-        final int frametime = this.frameLengths.get(this.currentFrame) == null ? this.defaultFrameTime
+        final int frameTime = this.frameLengths.get(this.currentFrame) == null ? this.defaultFrameTime
             : this.frameLengths.get(this.currentFrame);
-        if (this.countTimeForFrames >= 1f / frametime) {
+        if (this.countTimeForFrames >= 1f / frameTime) {
             this.countTimeForFrames = 0;
 
             if (++this.currentFrame >= this.frameCount) {
@@ -60,7 +60,7 @@ public class AnimatableTexture extends AbstractWidget {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.enableDepthTest();
-        blit(stack, this.x, this.y, 0, this.width * this.currentFrame, this.width, this.height, this.imageWidth,
+        blit(stack, getX(), getY(), 0, getWidth() * this.currentFrame, getWidth(), getHeight(), this.imageWidth,
             this.imageHeight);
     }
     
@@ -73,7 +73,7 @@ public class AnimatableTexture extends AbstractWidget {
     }
     
     @Override
-    public void updateNarration(NarrationElementOutput narration) {
+    public void updateWidgetNarration(NarrationElementOutput narration) {
         defaultButtonNarrationText(narration);
     }
     

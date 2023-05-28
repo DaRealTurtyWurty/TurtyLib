@@ -2,8 +2,8 @@ package dev.turtywurty.turtylib.client.util;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import net.minecraft.client.renderer.GameRenderer;
+import org.joml.Matrix4f;
 
 public abstract class Gradient {
     protected abstract int getTopLeftColor();
@@ -89,7 +89,6 @@ public abstract class Gradient {
 
     private static void draw(Matrix4f matrix4f, int x0, int y0, int x1, int y1, int topLeftColor, int topRightColor, int bottomLeftColor, int bottomRightColor) {
         // Setup
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
@@ -122,6 +121,5 @@ public abstract class Gradient {
         // Cleanup
         tesselator.end();
         RenderSystem.disableBlend();
-        RenderSystem.enableTexture();
     }
 }

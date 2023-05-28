@@ -30,36 +30,36 @@ public class EntityWidget extends AbstractWidget {
     }
     
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void renderWidget(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         if(!this.visible)
             return;
 
-        this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, this.x, this.y, this.width, this.height);
+        this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, getX(), getY(), getWidth(), getHeight());
 
         if (this.rotationSpeed != 0) {
             this.rotation += partialTicks * this.rotationSpeed;
         }
-        
+
         this.entity.tick();
-        
+
         GuiUtils.renderEntity(stack, this.entity,
             this.rotationSpeed != 0 ? new Vec3(this.defaultRotation.x(), this.rotation, this.defaultRotation.z())
                 : this.defaultRotation,
-            this.scale, this.offset, this.x, this.y, partialTicks);
+            this.scale, this.offset, getX(), getY(), partialTicks);
     }
-    
+
     @Override
-    public void updateNarration(NarrationElementOutput narration) {
+    public void updateWidgetNarration(NarrationElementOutput narration) {
         defaultButtonNarrationText(narration);
     }
-    
+
     public static class Builder {
         private float rotationSpeed;
         private Vec3 scale = new Vec3(20f, 20f, 20f), defaultRotation = new Vec3(15, 135, 0),
             offset = new Vec3(-1.25f, -1.75f, 0);
         private Entity entity;
-        private int xPos, yPos, width, height;
-        
+        private final int xPos, yPos, width, height;
+
         public Builder(Entity entity, int xPos, int yPos, int width, int height) {
             this.entity = entity;
             this.xPos = xPos;

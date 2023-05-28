@@ -10,7 +10,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.IntSupplier;
-import java.util.function.Supplier;
 
 public class ProgressWidget extends AbstractWidget {
     private final int frames;
@@ -39,15 +38,15 @@ public class ProgressWidget extends AbstractWidget {
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
+    public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {
         defaultButtonNarrationText(pNarrationElementOutput);
     }
 
     @Override
-    public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    public void renderWidget(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
         if (!this.visible) return;
 
-        this.isHovered = MathUtils.isWithinArea(pMouseX, pMouseY, this.x, this.y, this.width, this.height);
+        this.isHovered = MathUtils.isWithinArea(pMouseX, pMouseY, getX(), getY(), getWidth(), getHeight());
 
         int progress = this.progressSupplier.getAsInt();
         int maxProgress = this.maxProgressSupplier.getAsInt();
@@ -58,8 +57,7 @@ public class ProgressWidget extends AbstractWidget {
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, this.texture);
-        blit(pPoseStack, this.x, this.y, this.textureX, this.textureY + (this.frame * this.width), this.width,
-                this.height);
+        blit(pPoseStack, getX(), getY(), this.textureX, this.textureY + (this.frame * getWidth()), getWidth(), getHeight());
 
         // Render progress bar
         int fillWidth = (int) ((float) progress / (float) maxProgress * this.fillWidth);

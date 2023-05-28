@@ -5,10 +5,14 @@ import dev.turtywurty.turtylib.common.blockentity.module.MultiblockModule;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -20,7 +24,7 @@ public class CSyncMultiblockControllerPacket {
 
     public CSyncMultiblockControllerPacket(FriendlyByteBuf friendlyByteBuf) {
         this(friendlyByteBuf.readBlockPos(), friendlyByteBuf.readList(FriendlyByteBuf::readBlockPos),
-                NbtUtils.readBlockState(friendlyByteBuf.readNbt()));
+                NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), friendlyByteBuf.readNbt()));
     }
 
     public CSyncMultiblockControllerPacket(BlockPos controller, List<BlockPos> positions, BlockState previous) {

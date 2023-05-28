@@ -13,7 +13,7 @@ public class GroupedTab extends Tab {
     public static final int WHITESPACE = 2;
     private final List<Tab> subTabs = new ArrayList<>();
 
-    public GroupedTab(TabHolder screen, TabPage page, Orientation orientation, String name, int xPos, int yPos,
+    public GroupedTab(TabHolder<?> screen, TabPage page, Orientation orientation, String name, int xPos, int yPos,
             Tab... subTabs) {
         super(screen, page, orientation, name, xPos, yPos);
         Collections.addAll(this.subTabs, subTabs);
@@ -22,21 +22,21 @@ public class GroupedTab extends Tab {
     }
     
     public int getOffset() {
-        return this.subTabs.size() * ((this.orientation.vertical ? this.height : this.width) + WHITESPACE);
+        return this.subTabs.size() * ((this.orientation.vertical ? getHeight() : getWidth()) + WHITESPACE);
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void renderWidget(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         boolean tabsHovered = false;
         final int offset = getOffset();
         final int height = offset + 20 + WHITESPACE * this.subTabs.size();
-        if (MathUtils.isWithinArea(mouseX, mouseY, this.x + this.width, this.subTabs.get(0).y, this.width, offset)) {
+        if (MathUtils.isWithinArea(mouseX, mouseY, getX() + getWidth(), this.subTabs.get(0).getY(), getWidth(), offset)) {
             tabsHovered = true;
         }
         
         if (tabsHovered || this.isHovered && this.active) {
-            GuiUtils.drawQuadSplitTexture(stack, this.x + this.width / 2, this.y + this.height / 2 - height / 2,
-                    this.width * 2, height, 256, 256);
+            GuiUtils.drawQuadSplitTexture(stack, getX() + getWidth() / 2, getY() + getHeight() / 2 - height / 2,
+                    getWidth() * 2, height, 256, 256);
         }
         
         super.render(stack, mouseX, mouseY, partialTicks);
@@ -69,32 +69,32 @@ public class GroupedTab extends Tab {
                 continue;
             }
 
-            int x = this.x, y = this.y;
+            int x = getX(), y = getY();
             switch (this.orientation) {
-                case BOTTOM_TOP:
-                    y += this.height;
+                case BOTTOM_TOP -> {
+                    y += getHeight();
                     x -= offset;
-                    break;
-                case LEFT_RIGHT:
-                    x -= this.width;
+                }
+                case LEFT_RIGHT -> {
+                    x -= getWidth();
                     y -= offset;
-                    break;
-                case RIGHT_LEFT:
-                    x += this.width;
+                }
+                case RIGHT_LEFT -> {
+                    x += getWidth();
                     y -= offset;
-                    break;
-                case TOP_BOTTOM:
-                    y -= this.height;
+                }
+                case TOP_BOTTOM -> {
+                    y -= getHeight();
                     x -= offset;
-                    break;
+                }
             }
 
             if (this.orientation.vertical) {
-                tab.y = tabIndex++ * (this.height + WHITESPACE) + this.y - offset / 2 + this.height / 2 + 1;
-                tab.x = x;
+                tab.setY(tabIndex++ * (getHeight() + WHITESPACE) + getY() - offset / 2 + getHeight() / 2 + 1);
+                tab.setX(x);
             } else {
-                tab.x += tabIndex++ * (this.width + WHITESPACE) + this.x - offset / 2 + this.width / 2 + 1;
-                tab.y = y;
+                tab.setX(tab.getX() + (tabIndex++ * (getWidth() + WHITESPACE) + getX() - offset / 2 + getWidth() / 2 + 1));
+                tab.setY(y);
             }
         }
     }

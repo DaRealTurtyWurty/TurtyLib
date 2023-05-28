@@ -4,6 +4,7 @@ import dev.turtywurty.turtylib.common.blockentity.MultiblockBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,7 +25,7 @@ public class CSyncMultiblockPacket {
 
     public CSyncMultiblockPacket(FriendlyByteBuf friendlyByteBuf) {
         this(friendlyByteBuf.readBlockPos(), friendlyByteBuf.readBlockPos(),
-                NbtUtils.readBlockState(friendlyByteBuf.readNbt()));
+                NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), friendlyByteBuf.readNbt()));
     }
 
     public void encode(FriendlyByteBuf friendlyByteBuf) {

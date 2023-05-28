@@ -1,14 +1,8 @@
 package dev.turtywurty.turtylib.book;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import com.mojang.blaze3d.platform.PngInfo;
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import dev.turtywurty.turtylib.client.util.ClientUtils;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
@@ -17,6 +11,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class AdvancedBookScreen extends Screen {
     protected final List<Page> pages = new ArrayList<>();
@@ -90,9 +89,9 @@ public class AdvancedBookScreen extends Screen {
             final ResourceLocation pageTexture = this.pages.get(this.currentPage).texture;
             try {
                 final Resource resource = this.resourceManager.getResource(pageTexture).get();
-                final var pngInfo = new PngInfo(resource::toString, resource.open());
-                this.imageWidth = pngInfo.width;
-                this.imageHeight = pngInfo.height;
+                NativeImage nativeImage = NativeImage.read(resource.open());
+                this.imageWidth = nativeImage.getWidth();
+                this.imageHeight = nativeImage.getHeight();
             } catch (final IOException exception) {
                 throw new IllegalStateException(
                     "There was an issue getting the information for resource: " + pageTexture, exception);
@@ -105,16 +104,16 @@ public class AdvancedBookScreen extends Screen {
         final ResourceLocation rightPageTexture = this.pages.get(this.currentPage + 1).texture;
         try {
             final Resource leftPageResource = this.resourceManager.getResource(leftPageTexture).get();
-            final var leftPagePngInfo = new PngInfo(leftPageResource::toString, leftPageResource.open());
-            this.leftPageWidth = leftPagePngInfo.width;
+            final var leftPageNativeImage = NativeImage.read(leftPageResource.open());
+            this.leftPageWidth = leftPageNativeImage.getWidth();
 
             final Resource binderResource = this.resourceManager.getResource(binderTexture).get();
-            final var binderPngInfo = new PngInfo(binderResource::toString, binderResource.open());
-            this.binderWidth = binderPngInfo.width;
+            final var binderNativeImage = NativeImage.read(binderResource.open());
+            this.binderWidth = binderNativeImage.getWidth();
 
             final Resource rightPageResource = this.resourceManager.getResource(rightPageTexture).get();
-            final var rightPagePngInfo = new PngInfo(rightPageResource::toString, rightPageResource.open());
-            this.rightPageWidth = rightPagePngInfo.width;
+            final var rightPageNativeImage = NativeImage.read(rightPageResource.open());
+            this.rightPageWidth = rightPageNativeImage.getWidth();
         } catch (final IOException exception) {
             throw new IllegalStateException("There was an issue getting the information for resource: "
                 + leftPageTexture + " or " + binderTexture + " or " + rightPageTexture, exception);

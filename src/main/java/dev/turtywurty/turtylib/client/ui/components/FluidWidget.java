@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector4f;
 
 import dev.turtywurty.turtylib.client.util.ClientUtils;
 import dev.turtywurty.turtylib.client.util.GuiUtils;
@@ -20,6 +19,7 @@ import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector4f;
 
 public class FluidWidget extends AbstractWidget {
     private final Minecraft minecraft;
@@ -62,13 +62,13 @@ public class FluidWidget extends AbstractWidget {
     
     public void drawTooltip(PoseStack stack, int mouseX, int mouseY) {
         final boolean withinHorizontal = this.orientation == Orientation.LEFT_RIGHT
-            && MathUtils.isWithinArea(mouseX, mouseY, this.x, this.y, this.info.scaledWidth, this.height)
+            && MathUtils.isWithinArea(mouseX, mouseY, getX(), getY(), this.info.scaledWidth, getHeight())
             || this.orientation == Orientation.RIGHT_LEFT && MathUtils.isWithinArea(mouseX, mouseY,
-                this.x + this.width - this.info.scaledWidth, this.y, this.info.scaledWidth, this.height);
+                getX() + getWidth() - this.info.scaledWidth, getY(), this.info.scaledWidth, getHeight());
         final boolean withinVertical = this.orientation == Orientation.TOP_BOTTOM
-            && MathUtils.isWithinArea(mouseX, mouseY, this.x, this.y, this.width, this.info.scaledHeight)
-            || this.orientation == Orientation.BOTTOM_TOP && MathUtils.isWithinArea(mouseX, mouseY, this.x,
-                this.y + this.height - this.info.scaledHeight, this.width, this.info.scaledHeight);
+            && MathUtils.isWithinArea(mouseX, mouseY, getX(), getY(), getWidth(), this.info.scaledHeight)
+            || this.orientation == Orientation.BOTTOM_TOP && MathUtils.isWithinArea(mouseX, mouseY, getX(),
+                getY() + getHeight() - this.info.scaledHeight, getWidth(), this.info.scaledHeight);
         if (withinHorizontal || withinVertical) {
             this.minecraft.screen.renderComponentTooltip(stack, getTooltip(), mouseX, mouseY);
         }
@@ -79,7 +79,7 @@ public class FluidWidget extends AbstractWidget {
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void renderWidget(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         if(!this.visible)
             return;
 
@@ -87,55 +87,57 @@ public class FluidWidget extends AbstractWidget {
         int x0 = 0, y0 = 0, x1 = 0, y1 = 0;
         switch (this.orientation) {
             case LEFT_RIGHT -> {
-                x0 = this.x;
-                y0 = this.y;
-                x1 = this.x + this.info.scaledWidth;
-                y1 = this.y + this.height;
-                mX0 = this.x;
-                mY0 = this.y;
-                mX1 = this.x + this.width;
-                mY1 = this.y + this.height;
+                x0 = getX();
+                y0 = getY();
+                x1 = getX() + this.info.scaledWidth;
+                y1 = getY() + getHeight();
+                mX0 = getX();
+                mY0 = getY();
+                mX1 = getX() + getWidth();
+                mY1 = getY() + getHeight();
             }
             case TOP_BOTTOM -> {
-                x0 = this.x;
-                y0 = this.y;
-                x1 = this.x + this.width;
-                y1 = this.y + this.info.scaledHeight;
-                mX0 = this.x;
-                mY0 = this.y;
-                mX1 = this.x + this.width;
-                mY1 = this.y + this.height;
+                x0 = getX();
+                y0 = getY();
+                x1 = getX() + getWidth();
+                y1 = getY() + this.info.scaledHeight;
+                mX0 = getX();
+                mY0 = getY();
+                mX1 = getX() + getWidth();
+                mY1 = getY() + getHeight();
             }
             case RIGHT_LEFT -> {
-                x0 = this.x + this.width - this.info.scaledWidth;
-                y0 = this.y;
-                x1 = this.x + this.width;
-                y1 = this.y + this.height;
-                mX0 = this.x + this.width;
-                mY0 = this.y;
-                mX1 = this.x;
-                mY1 = this.y + this.height;
+                x0 = getX() + getWidth() - this.info.scaledWidth;
+                y0 = getY();
+                x1 = getX() + getWidth();
+                y1 = getY() + getHeight();
+                mX0 = getX() + getWidth();
+                mY0 = getY();
+                mX1 = getX();
+                mY1 = getY() + getHeight();
             }
             case BOTTOM_TOP -> {
-                x0 = this.x;
-                y0 = this.y + this.height - this.info.scaledHeight;
-                x1 = this.x + this.width;
-                y1 = this.y + this.height;
-                mX0 = this.x;
-                mY0 = this.y + this.height;
-                mX1 = this.x + this.width;
-                mY1 = this.y;
+                x0 = getX();
+                y0 = getY() + getHeight() - this.info.scaledHeight;
+                x1 = getX() + getWidth();
+                y1 = getY() + getHeight();
+                mX0 = getX();
+                mY0 = getY() + getHeight();
+                mX1 = getX() + getWidth();
+                mY1 = getY();
             }
         }
 
         this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, x0, y0, x1 - x0, y1 - y0);
 
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
-        RenderSystem.setShaderColor(this.info.color.x(), this.info.color.y(), this.info.color.z(), this.info.color.w());
-        RenderSystem.enableBlend();
-        GuiUtils.renderLoopSprite(this.info.getTexture(), stack, x0, y0, x1, y1, this.info.loopX, this.info.loopY);
-        RenderSystem.disableBlend();
+        if(this.info.getTexture() != null) {
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
+            RenderSystem.setShaderColor(this.info.color.x(), this.info.color.y(), this.info.color.z(), this.info.color.w());
+            RenderSystem.enableBlend();
+            GuiUtils.renderLoopSprite(this.info.getTexture(), stack, x0, y0, x1, y1, this.info.loopX, this.info.loopY);
+            RenderSystem.disableBlend();
+        }
 
         if(this.drawBorder) {
             GuiUtils.drawOutline(stack, mX0, mY0, mX1, mY1, this.borderColour, 1);
@@ -172,15 +174,15 @@ public class FluidWidget extends AbstractWidget {
         this.info.renderProps = IClientFluidTypeExtensions.of(this.info.fluidStack.getFluid());
         this.info.color = ClientUtils.ARGBtoRGBA(this.info.renderProps.getTintColor(fluid));
         setFlowing(this.info.flowing);
-        this.info.scaledWidth = (int) (this.width / (this.maximum / (float) fluid.getAmount()));
-        this.info.scaledHeight = (int) (this.height / (this.maximum / (float) fluid.getAmount()));
+        this.info.scaledWidth = (int) (getWidth() / (this.maximum / (float) fluid.getAmount()));
+        this.info.scaledHeight = (int) (getHeight() / (this.maximum / (float) fluid.getAmount()));
         final var fluidName = Component.translatable(fluid.getTranslationKey());
         final var amount = Component.literal(fluid.getAmount() + "/" + this.maximum);
         this.info.tooltip = List.of(fluidName, amount);
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput narration) {
+    public void updateWidgetNarration(NarrationElementOutput narration) {
         defaultButtonNarrationText(narration);
     }
 
@@ -188,7 +190,7 @@ public class FluidWidget extends AbstractWidget {
         return this.info.tooltip;
     }
 
-    @Override
+    @Deprecated(since = "1.19.3")
     public void renderToolTip(PoseStack pPoseStack, int pMouseX, int pMouseY) {
         if(this.visible && this.isHovered) {
             if(this.info.tooltip != null && !this.info.tooltip.isEmpty()) {

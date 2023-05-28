@@ -2,14 +2,14 @@ package dev.turtywurty.turtylib.client.ui.components.tabs;
 
 import dev.turtywurty.turtylib.client.ui.ContainerMachineScreen;
 
-public interface TabHolder<Type extends Tab> {
+public interface TabHolder<T extends Tab> {
     TabPage[] getPages();
     
     ContainerMachineScreen<?> getScreen();
     
-    Type getSelectedTab();
+    T getSelectedTab();
     
-    Type[] getTabs();
+    T[] getTabs();
     
-    void setSelectedTab(Type tab);
+    void setSelectedTab(Tab tab);
 }

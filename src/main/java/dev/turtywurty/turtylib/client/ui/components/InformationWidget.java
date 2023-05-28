@@ -1,11 +1,7 @@
 package dev.turtywurty.turtylib.client.ui.components;
 
-import java.util.List;
-import java.util.Optional;
-
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import dev.turtywurty.turtylib.client.util.Resources;
 import dev.turtywurty.turtylib.core.util.MathUtils;
 import net.minecraft.client.Minecraft;
@@ -18,6 +14,9 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
+import java.util.List;
+import java.util.Optional;
+
 public class InformationWidget extends AbstractWidget {
     private final List<Component> onHover;
     private final Optional<TooltipComponent> optionalComponent;
@@ -28,9 +27,8 @@ public class InformationWidget extends AbstractWidget {
     public InformationWidget(Screen screen, int xPos, int yPos, int width, int height, Component... hoverText) {
         this(screen, xPos, yPos, width, height, Optional.empty(), hoverText);
     }
-    
-    public InformationWidget(Screen screen, int xPos, int yPos, int width, int height,
-        Optional<TooltipComponent> optionalComponent, Component... hoverText) {
+
+    public InformationWidget(Screen screen, int xPos, int yPos, int width, int height, Optional<TooltipComponent> optionalComponent, Component... hoverText) {
         super(xPos, yPos, width, height, Component.empty());
         this.screen = screen;
         this.optionalComponent = optionalComponent;
@@ -44,32 +42,31 @@ public class InformationWidget extends AbstractWidget {
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        if(this.visible) return;
+    public void renderWidget(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+        if (this.visible) return;
 
-        this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, this.x, this.y, this.width, this.height);
+        this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, getX(), getY(), getWidth(), getHeight());
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, Resources.INFORMATION);
         RenderSystem.disableDepthTest();
-        blit(stack, this.x, this.y, 0, 0, this.width, this.height, 16, 16);
+        blit(stack, getX(), getY(), 0, 0, getWidth(), getHeight(), 16, 16);
         RenderSystem.enableDepthTest();
     }
 
-    @Override
+    @Deprecated(since = "1.19.3")
     public void renderToolTip(PoseStack stack, int mouseX, int mouseY) {
         if (this.visible && this.isHovered) {
             this.screen.renderTooltip(stack, this.onHover, this.optionalComponent, mouseX, mouseY);
         }
     }
-    
+
     public void setVisible(boolean visible) {
         this.visible = visible;
     }
-    
+
     @Override
-    public void updateNarration(NarrationElementOutput narration) {
-        narration.add(NarratedElementType.HINT, Component.translatable("narration.turtychemistry.information_button",
-            (Object[]) this.onHover.toArray(new Component[0])));
+    public void updateWidgetNarration(NarrationElementOutput narration) {
+        narration.add(NarratedElementType.HINT, Component.translatable("narration.turtylib.information_button", this.onHover.toArray(new Object[0])));
     }
 }

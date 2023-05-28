@@ -1,31 +1,31 @@
 package dev.turtywurty.turtylib.client.util;
 
+import com.google.common.collect.ImmutableMap;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
+import net.minecraft.client.resources.metadata.animation.FrameSize;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.platform.PngInfo;
-import com.mojang.datafixers.util.Pair;
-
-import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
-
 public class ImageInfo {
     public final Resource resource;
-    public final PngInfo pngInfo;
+    public final NativeImage nativeImage;
     public final int width, height;
     public final boolean hasMetadata;
     public final Optional<AnimationData> animationData;
 
+    // TODO: Metadata is a bit scuffed, fix it
     public ImageInfo(ResourceLocation textureLoc) {
         try {
             this.resource = ClientUtils.getResourceManager().getResource(textureLoc).get();
-            this.pngInfo = new PngInfo(this.resource::toString, this.resource.open());
-            this.width = this.pngInfo.width;
-            this.height = this.pngInfo.height;
+            this.nativeImage = NativeImage.read(this.resource.open());
+            this.width = this.nativeImage.getWidth();
+            this.height = this.nativeImage.getHeight();
             this.hasMetadata = this.resource.metadata() != null;
             if (this.hasMetadata) {
                 this.animationData = Optional.of(
@@ -49,9 +49,9 @@ public class ImageInfo {
 
         private AnimationData(AnimationMetadataSection metadata, int imgWidth, int imgHeight) {
             this.metadata = metadata;
-            final Pair<Integer, Integer> widthHeight = metadata.getFrameSize(imgWidth, imgHeight);
-            this.frameWidth = widthHeight.getFirst();
-            this.frameHeight = widthHeight.getSecond();
+            final FrameSize widthHeight = metadata.calculateFrameSize(imgWidth, imgHeight);
+            this.frameWidth = widthHeight.width();
+            this.frameHeight = widthHeight.height();
             this.frameCount = imgHeight / this.frameHeight;
             this.isInterpolated = metadata.isInterpolatedFrames();
             final Map<Integer, Integer> frameMap = new HashMap<>();

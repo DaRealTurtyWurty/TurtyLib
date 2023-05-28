@@ -16,12 +16,12 @@ public class TexturedButton extends Button {
     protected final Object2FloatFunction<TexturedButton> alpha;
     protected final int texX, texY, texWidth, texHeight;
 
-    public TexturedButton(ResourceLocation texture, int xPos, int yPos, int width, int height, int texX, int texY, int texWidth, int texHeight, float alpha, OnPress pressable, OnTooltip tooltip) {
-        this(texture, xPos, yPos, width, height, texX, texY, texWidth, texHeight, btn -> alpha, pressable, tooltip);
+    public TexturedButton(ResourceLocation texture, int xPos, int yPos, int width, int height, int texX, int texY, int texWidth, int texHeight, float alpha, OnPress pressable, CreateNarration narration) {
+        this(texture, xPos, yPos, width, height, texX, texY, texWidth, texHeight, btn -> alpha, pressable, narration);
     }
 
-    public TexturedButton(ResourceLocation texture, int xPos, int yPos, int width, int height, int texX, int texY, int texWidth, int texHeight, Object2FloatFunction<TexturedButton> alpha, OnPress pressable, OnTooltip tooltip) {
-        super(xPos, yPos, width, height, Component.empty(), pressable, tooltip);
+    public TexturedButton(ResourceLocation texture, int xPos, int yPos, int width, int height, int texX, int texY, int texWidth, int texHeight, Object2FloatFunction<TexturedButton> alpha, OnPress pressable, CreateNarration narration) {
+        super(xPos, yPos, width, height, Component.empty(), pressable, narration);
         this.minecraft = Minecraft.getInstance();
         this.texture = texture;
         this.alpha = alpha;
@@ -32,20 +32,20 @@ public class TexturedButton extends Button {
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void renderWidget(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         if (!this.visible) return;
 
-        this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, this.x, this.y, this.width, this.height);
+        this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, getX(), getY(), getWidth(), getHeight());
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, this.texture);
         final float alpha = this.alpha.getFloat(this);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha >= 0 && this.alpha.getFloat(this) <= 1 ? alpha : 1.0f);
-        final int yTexOffset = this.isHovered ? this.height : 0;
+        final int yTexOffset = this.isHovered ? getHeight() : 0;
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.enableDepthTest();
-        blit(stack, this.x, this.y, this.texX, this.texY + yTexOffset, this.width, this.height, this.texWidth,
+        blit(stack, getX(), getY(), this.texX, this.texY + yTexOffset, getWidth(), getHeight(), this.texWidth,
                 this.texHeight);
     }
 

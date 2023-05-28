@@ -1,7 +1,6 @@
 package dev.turtywurty.turtylib.client.ui.components;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
 import dev.turtywurty.turtylib.client.util.FourVec2;
 import dev.turtywurty.turtylib.client.util.GuiUtils;
 import dev.turtywurty.turtylib.core.util.MathUtils;
@@ -38,10 +37,10 @@ public class LineGraphWidget extends AbstractWidget {
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void renderWidget(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         if (!this.visible) return;
 
-        this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, this.x, this.y, this.width, this.height);
+        this.isHovered = MathUtils.isWithinArea(mouseX, mouseY, getX(), getY(), getWidth(), getHeight());
 
         drawAxis(stack);
         drawNodes(stack);
@@ -56,7 +55,7 @@ public class LineGraphWidget extends AbstractWidget {
         }
     }
 
-    @Override
+    @Deprecated(since = "1.19.3")
     public void renderToolTip(PoseStack pPoseStack, int pMouseX, int pMouseY) {
         if (this.visible && this.isHovered) {
             int index = 0;
@@ -64,18 +63,20 @@ public class LineGraphWidget extends AbstractWidget {
                 final Number maxNumb = this.nodes.stream().map(Node::getValue)
                         .max(Comparator.comparingDouble(Number::doubleValue)).orElse(0);
                 final float delta = maxNumb.floatValue() - this.verticalAxis.minValue.floatValue();
-                final int yPos = this.y + this.height - (int) (node.value.floatValue() / delta * this.height);
-                final int xPos = this.x + index++ * 30;
+                final int yPos = getY() + getHeight() - (int) (node.value.floatValue() / delta * getHeight());
+                final int xPos = getX() + index++ * 30;
                 if (MathUtils.isWithinArea(pMouseX, pMouseY, xPos, yPos, 5, 5)) {
-                    this.minecraft.screen.renderTooltip(pPoseStack, Component.literal(node.getValue().toString()),
-                            pMouseX, pMouseY);
+                    if (this.minecraft.screen != null) {
+                        this.minecraft.screen.renderTooltip(pPoseStack, Component.literal(node.getValue().toString()),
+                                pMouseX, pMouseY);
+                    }
                 }
             }
         }
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput narration) {
+    public void updateWidgetNarration(NarrationElementOutput narration) {
         defaultButtonNarrationText(narration);
     }
 
@@ -86,17 +87,17 @@ public class LineGraphWidget extends AbstractWidget {
         final Number maxNumb = this.nodes.stream().map(Node::getValue)
                 .max(Comparator.comparingDouble(Number::doubleValue)).orElse(0);
         final float delta = maxNumb.floatValue() - this.verticalAxis.minValue.floatValue();
-        final int pos0 = this.y + this.height - (int) (node0.value.floatValue() / delta * this.height) + 2;
-        final int pos1 = this.y + this.height - (int) (node1.value.floatValue() / delta * this.height) + 2;
-        final FourVec2 fourVec = MathUtils.getFourVec(stack, this.x + 2 + index0 * 30, pos0, this.x + 2 + index1 * 30,
+        final int pos0 = getY() + getHeight() - (int) (node0.value.floatValue() / delta * getHeight()) + 2;
+        final int pos1 = getY() + getHeight() - (int) (node1.value.floatValue() / delta * getHeight()) + 2;
+        final FourVec2 fourVec = MathUtils.getFourVec(stack, getX() + 2 + index0 * 30, pos0, getX() + 2 + index1 * 30,
                 pos1, 1);
         GuiUtils.drawLine(stack, fourVec.first(), fourVec.second(), fourVec.third(), fourVec.fourth(), 0xFF00AA00);
     }
 
     private void drawAxis(PoseStack stack) {
-        final FourVec2 vertical = MathUtils.getFourVec(stack, this.x, this.y + this.height, this.x + this.width,
-                this.y + this.height, 1);
-        final FourVec2 horizontal = MathUtils.getFourVec(stack, this.x, this.y, this.x, this.y + this.height, 1);
+        final FourVec2 vertical = MathUtils.getFourVec(stack, getX(), getY() + getHeight(), getX() + getWidth(),
+                getY() + getHeight(), 1);
+        final FourVec2 horizontal = MathUtils.getFourVec(stack, getX(), getY(), getX(), getY() + getHeight(), 1);
         GuiUtils.drawLine(stack, vertical.first(), vertical.second(), vertical.third(), vertical.fourth(), 0xFF404040);
         GuiUtils.drawLine(stack, horizontal.first(), horizontal.second(), horizontal.third(), horizontal.fourth(),
                 0xFF404040);
@@ -104,14 +105,14 @@ public class LineGraphWidget extends AbstractWidget {
         drawValues(stack);
 
         final var horizontalComponent = Component.translatable(this.horizontalAxis.name());
-        GuiUtils.drawCenteredString(stack, horizontalComponent, this.x + this.width / 2, this.y + this.height + 20,
+        GuiUtils.drawCenteredString(stack, horizontalComponent, getX() + getWidth() / 2, getY() + getHeight() + 20,
                 0x404040);
 
         final var verticalComponent = Component.translatable(this.verticalAxis.name());
 
         stack.pushPose();
-        stack.translate(this.x - 30, this.y + this.height / 2f, 0);
-        stack.mulPose(Vector3f.ZP.rotationDegrees(-90f));
+        stack.translate(getX() - 30, getY() + getHeight() / 2f, 0);
+        stack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(-90f));
         GuiUtils.drawCenteredString(stack, verticalComponent, 0, 0, 0x404040);
         stack.popPose();
     }
@@ -119,28 +120,28 @@ public class LineGraphWidget extends AbstractWidget {
     private void drawNodes(PoseStack stack) {
         int index = 0;
         for (final Node node : this.nodes) {
-            renderNode(node, stack, this.x + index++ * 30, this.y);
+            renderNode(node, stack, getX() + index++ * 30, getY());
         }
     }
 
     private void drawValues(PoseStack stack) {
-        this.minecraft.font.draw(stack, Component.literal(this.verticalAxis.minValue + ""), this.x - 7,
-                this.y + this.height - this.minecraft.font.lineHeight / 2f, 0x404040);
+        this.minecraft.font.draw(stack, Component.literal(String.valueOf(this.verticalAxis.minValue)), getX() - 7,
+                getY() + getHeight() - this.minecraft.font.lineHeight / 2f, 0x404040);
         final Number maxNumb = this.nodes.stream().map(Node::getValue)
                 .max(Comparator.comparingDouble(Number::doubleValue)).orElse(0);
 
-        final float amount = this.height / (float) DISTANCE;
+        final float amount = getHeight() / (float) DISTANCE;
         final float increment = (maxNumb.floatValue() - this.verticalAxis.minValue().floatValue()) / amount;
 
         for (float d = 1; d <= amount; d++) {
             final String toDraw = MathUtils.withSuffix((int) Math.ceil(d * increment));
-            this.minecraft.font.draw(stack, toDraw, this.x - this.minecraft.font.width(toDraw) - 2,
-                    this.y + this.height - DISTANCE * d - 5, 0x404040);
+            this.minecraft.font.draw(stack, toDraw, getX() - this.minecraft.font.width(toDraw) - 2,
+                    getY() + getHeight() - DISTANCE * d - 5, 0x404040);
         }
 
         for (int index = 0; index < this.horizontalAxis.classes.size(); index++) {
-            GuiUtils.drawCenteredString(stack, this.horizontalAxis.getClasses().get(index), this.x + index * 30,
-                    this.y + this.height + 5, 0x404040);
+            GuiUtils.drawCenteredString(stack, this.horizontalAxis.getClasses().get(index), getX() + index * 30,
+                    getY() + getHeight() + 5, 0x404040);
         }
     }
 
@@ -148,7 +149,7 @@ public class LineGraphWidget extends AbstractWidget {
         final Number maxNumb = this.nodes.stream().map(Node::getValue)
                 .max(Comparator.comparingDouble(Number::doubleValue)).orElse(0);
         final float delta = maxNumb.floatValue() - this.verticalAxis.minValue.floatValue();
-        final int pos = this.y + this.height - (int) (node.value.floatValue() / delta * this.height);
+        final int pos = getY() + getHeight() - (int) (node.value.floatValue() / delta * getHeight());
         GuiUtils.drawQuad(stack, x, pos, x + 5, pos + 5, 0xFFFF0000);
     }
 

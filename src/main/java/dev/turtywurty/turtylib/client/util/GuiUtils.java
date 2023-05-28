@@ -4,10 +4,7 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
+import com.mojang.math.Axis;
 import dev.turtywurty.turtylib.core.util.MathUtils;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -29,6 +26,9 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector4f;
 
 public final class GuiUtils {
     private GuiUtils() {
@@ -56,7 +56,6 @@ public final class GuiUtils {
 
     public static void drawLine(double startX, double startY, double endX, double endY, int red, int green, int blue, int alpha, float lineWidth) {
         RenderSystem.assertOnRenderThread();
-        RenderSystem.disableTexture();
         RenderSystem.depthMask(false);
         RenderSystem.disableCull();
         RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
@@ -70,7 +69,6 @@ public final class GuiUtils {
         RenderSystem.lineWidth(1.0F);
         RenderSystem.enableCull();
         RenderSystem.depthMask(true);
-        RenderSystem.enableTexture();
     }
 
     public static void drawLine(PoseStack stack, Vec2 start0, Vec2 start1, Vec2 end0, Vec2 end1, int argbColor) {
@@ -124,19 +122,17 @@ public final class GuiUtils {
         stack.scale(1.0F, 1.0F, -1.0F);
         stack.translate(0.0D, 0.0D, 1000.0D);
         stack.scale((float) scale.x(), (float) scale.y(), (float) scale.z());
-        final Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
+        final Quaternionf quaternion = Axis.ZP.rotationDegrees(180.0F);
         stack.mulPose(quaternion);
         stack.translate(offset.x(), offset.y(), offset.z());
-        stack.mulPose(new Quaternion((float) -rotation.x(), (float) -rotation.y(), (float) -rotation.z(), true));
+        stack.mulPose(new Quaternionf((float) -rotation.x(), (float) -rotation.y(), (float) -rotation.z(), 1));
 
         Lighting.setupForEntityInInventory();
 
         final EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
         renderManager.setRenderShadow(false);
         final MultiBufferSource.BufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
-        RenderSystem.runAsFancy(() -> {
-            render(renderManager, entity, 0.0D, 0.0D, 0.0D, 0.0F, partialTicks, stack, buffer, 15728880);
-        });
+        RenderSystem.runAsFancy(() -> render(renderManager, entity, 0.0D, 0.0D, 0.0D, 0.0F, partialTicks, stack, buffer, 15728880));
         renderManager.setRenderShadow(true);
         buffer.endBatch();
 
