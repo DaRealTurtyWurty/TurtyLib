@@ -19,12 +19,12 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class MultiblockModule implements Module {
-    private final Supplier<Multiblock> multiblock;
+    private final Supplier<? extends Multiblock> multiblock;
     private final List<BlockPos> positions = new ArrayList<>();
     private BlockState previous;
     private boolean forRemoval;
 
-    public MultiblockModule(Supplier<Multiblock> multiblockSupplier) {
+    public MultiblockModule(Supplier<? extends Multiblock> multiblockSupplier) {
         this.multiblock = multiblockSupplier;
     }
 

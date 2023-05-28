@@ -2,7 +2,7 @@ package dev.turtywurty.turtylib.core.multiblock;
 
 import net.minecraft.world.InteractionResult;
 
-public class Multiblock {
+public abstract class Multiblock {
     private final UseFunction useFunction;
 
     public Multiblock(Builder builder) {

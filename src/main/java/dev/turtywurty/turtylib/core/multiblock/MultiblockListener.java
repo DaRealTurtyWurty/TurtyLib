@@ -25,7 +25,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mod.EventBusSubscriber(modid = TurtyLib.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -40,12 +42,10 @@ public final class MultiblockListener {
         for (PlayerBuiltMultiblock multiblock : TurtyLib.MULTIBLOCK_REGISTRY.get().getValues().stream()
                 .filter(PlayerBuiltMultiblock.class::isInstance).map(PlayerBuiltMultiblock.class::cast)
                 .filter(mblock -> !mblock.requiresActivation()).toList()) {
-            if (!multiblock.isValid(block)) {
-                continue;
-            }
+            if (!multiblock.isValid(block)) continue;
 
             long startTime = System.currentTimeMillis();
-            BlockPattern.BlockPatternMatch match = find(multiblock.getPatternMatcher(), level, position);
+            BlockPattern.BlockPatternMatch match = findSmall(multiblock.getPatternMatcher(), level, position);
             long endTime = System.currentTimeMillis();
             TurtyLib.LOGGER.info("Took {}ms to {}find a match", endTime - startTime, match == null ? "not " : "");
 
@@ -55,29 +55,7 @@ public final class MultiblockListener {
             final BlockPos controllerPosition = match.getBlock(controller.getKey().getX(), controller.getKey().getY(),
                     controller.getKey().getZ()).getPos();
 
-            List<BlockPos> positions = new ArrayList<>();
-
-            final int multiBlockWidth = multiblock.getPatternMatcher().getWidth();
-            final int multiBlockHeight = multiblock.getPatternMatcher().getDepth();
-            final int multiBlockDepth = multiblock.getPatternMatcher().getHeight();
-            for (int x = 0; x < multiBlockWidth; x++) {
-                for (int y = 0; y < multiBlockHeight; y++) {
-                    for (int z = 0; z < multiBlockDepth; z++) {
-                        BlockInWorld inWorld = match.getBlock(x, z, y);
-                        BlockPos pos = inWorld.getPos();
-
-                        if (!pos.equals(controllerPosition)) {
-                            level.setBlock(pos, BlockInit.MULTIBLOCK.get().defaultBlockState(), Block.UPDATE_ALL);
-                            level.getBlockEntity(pos, BlockEntityInit.MULTIBLOCK.get()).ifPresent(blockEntity -> {
-                                blockEntity.setController(controllerPosition);
-                                blockEntity.setPrevious(inWorld.getState());
-                            });
-                        }
-
-                        positions.add(pos);
-                    }
-                }
-            }
+            List<BlockPos> positions = setMultiblockBlocks(level, multiblock, match, controllerPosition);
 
             BlockState currentControllerState = event.getLevel().getBlockState(controllerPosition);
             event.getLevel().setBlock(controllerPosition, controller.getValue(), Block.UPDATE_ALL);
@@ -105,7 +83,7 @@ public final class MultiblockListener {
         selfBuildingMultiblockValidation(level, position, block, stack);
     }
 
-    private static @Nullable BlockPattern.BlockPatternMatch find(BlockPattern pattern, LevelAccessor level, BlockPos pos) {
+    private static @Nullable BlockPattern.BlockPatternMatch findSmall(BlockPattern pattern, LevelAccessor level, BlockPos pos) {
         final int patternWidth = pattern.getWidth();
         final int patternDepth = pattern.getDepth();
         final int patternHeight = pattern.getHeight();
@@ -117,6 +95,42 @@ public final class MultiblockListener {
                     final BlockPattern.BlockPatternMatch found = pattern.find(level, offset);
 
                     if (found != null) return found;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static @Nullable BlockPattern.BlockPatternMatch findLarge(BlockPattern pattern, LevelAccessor level, BlockPos pos) {
+        final int patternWidth = pattern.getWidth();
+        final int patternDepth = pattern.getDepth();
+        final int patternHeight = pattern.getHeight();
+
+        // Collect all the positions of blocks in the pattern
+        Set<BlockPos> patternPositions = new HashSet<>();
+        for (int x = 0; x < patternWidth; x++) {
+            for (int y = 0; y < patternDepth; y++) {
+                for (int z = 0; z < patternHeight; z++) {
+                    BlockPos offset = new BlockPos(x, y, z);
+                    if (pattern.getPattern()[x][y][z] != null) {
+                        patternPositions.add(offset);
+                    }
+                }
+            }
+        }
+
+        // Check each position in the search area
+        for (int x = -patternWidth; x < patternWidth; x++) {
+            for (int y = -patternDepth; y < patternDepth; y++) {
+                for (int z = -patternHeight; z < patternHeight; z++) {
+                    BlockPos offset = pos.offset(x, y, z);
+                    if (patternPositions.contains(offset)) {
+                        BlockPattern.BlockPatternMatch found = pattern.find(level, offset);
+                        if (found != null) {
+                            return found;
+                        }
+                    }
                 }
             }
         }
@@ -136,7 +150,7 @@ public final class MultiblockListener {
             if (!multiblock.isValid(block)) continue;
 
             long startTime = System.currentTimeMillis();
-            BlockPattern.BlockPatternMatch match = find(multiblock.getPatternMatcher(), level, position);
+            BlockPattern.BlockPatternMatch match = findSmall(multiblock.getPatternMatcher(), level, position);
             long endTime = System.currentTimeMillis();
             TurtyLib.LOGGER.info("Took {}ms to {}find a match", endTime - startTime, match == null ? "not " : "");
 
@@ -159,29 +173,7 @@ public final class MultiblockListener {
 
             if (!isValid.get()) continue;
 
-            List<BlockPos> positions = new ArrayList<>();
-
-            final int multiBlockWidth = multiblock.getPatternMatcher().getWidth();
-            final int multiBlockHeight = multiblock.getPatternMatcher().getDepth();
-            final int multiBlockDepth = multiblock.getPatternMatcher().getHeight();
-            for (int x = 0; x < multiBlockWidth; x++) {
-                for (int y = 0; y < multiBlockHeight; y++) {
-                    for (int z = 0; z < multiBlockDepth; z++) {
-                        BlockInWorld inWorld = match.getBlock(x, z, y);
-                        BlockPos pos = inWorld.getPos();
-
-                        if (!pos.equals(controllerPosition)) {
-                            level.setBlock(pos, BlockInit.MULTIBLOCK.get().defaultBlockState(), Block.UPDATE_ALL);
-                            level.getBlockEntity(pos, BlockEntityInit.MULTIBLOCK.get()).ifPresent(blockEntity -> {
-                                blockEntity.setController(controllerPosition);
-                                blockEntity.setPrevious(inWorld.getState());
-                            });
-                        }
-
-                        positions.add(pos);
-                    }
-                }
-            }
+            List<BlockPos> positions = setMultiblockBlocks(level, multiblock, match, controllerPosition);
 
             BlockState currentControllerState = level.getBlockState(controllerPosition);
             level.setBlock(controllerPosition, controller.getValue(), Block.UPDATE_ALL);
@@ -207,8 +199,41 @@ public final class MultiblockListener {
 
         for (SelfBuildingMultiblock multiblock : multiblocks) {
             if (!multiblock.getBlockStatePredicate().test(block)) continue;
+            if(!multiblock.isValidItem(stack)) continue;
 
-
+            long startTime = System.currentTimeMillis();
+            long endTime = System.currentTimeMillis();
+            TurtyLib.LOGGER.info("Took {}ms to {} place", endTime - startTime, "not ");
         }
+    }
+
+    private static List<BlockPos> setMultiblockBlocks(LevelAccessor level, PlayerBuiltMultiblock multiblock, BlockPattern.BlockPatternMatch match, BlockPos controllerPosition) {
+        List<BlockPos> positions = new ArrayList<>();
+
+        final int multiBlockWidth = multiblock.getPatternMatcher().getWidth();
+        final int multiBlockHeight = multiblock.getPatternMatcher().getDepth();
+        final int multiBlockDepth = multiblock.getPatternMatcher().getHeight();
+        for (int x = 0; x < multiBlockWidth; x++) {
+            for (int y = 0; y < multiBlockHeight; y++) {
+                for (int z = 0; z < multiBlockDepth; z++) {
+                    BlockInWorld inWorld = match.getBlock(x, z, y);
+                    BlockPos pos = inWorld.getPos();
+
+                    if (!pos.equals(controllerPosition) && !multiblock.isIgnoredPosition(pos)) {
+                        level.setBlock(pos, BlockInit.MULTIBLOCK.get().defaultBlockState(), Block.UPDATE_ALL);
+                        level.getBlockEntity(pos, BlockEntityInit.MULTIBLOCK.get()).ifPresent(blockEntity -> {
+                            blockEntity.setController(controllerPosition);
+                            blockEntity.setPrevious(inWorld.getState());
+                        });
+
+                        positions.add(pos);
+                    } else if (pos.equals(controllerPosition)) {
+                        positions.add(pos);
+                    }
+                }
+            }
+        }
+
+        return positions;
     }
 }
